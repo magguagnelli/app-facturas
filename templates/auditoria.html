@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Pistas de Auditoría{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/auditoria.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="titSecciones left">
+    <h2>Pistas de auditoría</h2>
+</div>
+<div class="row w-100"></div>
+<div class="bodyForm col-3">
+    <div class="subenun">
+        <p class="verde_t"><b>Filtra por fecha, correo, acción o texto.</b></p>
+        <span></span>
+    </div>
+</div>
+<div class="au-container">
+    <div class="au-head">
+        <div class="au-actions">
+            <button id="btnBuscar" class="au-btn">
+                <i class="fa fa-search" aria-hidden="true"></i>&nbsp;Buscar
+            </button>
+            <button id="btnLimpiar" class="au-btn">
+                <i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;Limpiar
+            </button>
+            <button id="btnExport" class="au-btn">
+                <i class="fa fa-table" aria-hidden="true"></i> Descargar
+            </button>
+        </div>
+    </div>
+    <div class="au-filters">
+        <div>
+        <label>Desde</label>
+        <input id="fDesde" type="date">
+        </div>
+        <div>
+        <label>Hasta</label>
+        <input id="fHasta" type="date">
+        </div>
+        <div>
+        <label>Correo</label>
+        <input id="fCorreo" type="text" placeholder="usuario@imssbienestar.gob.mx">
+        </div>
+        <div>
+        <label>Acción</label>
+        <input id="fAccion" type="text" placeholder="LOGIN, CREATE_OS, ...">
+        </div>
+        <div class="span2">
+        <label>Descripcion</label>
+        <input id="fTexto" type="text" placeholder="buscar...">
+        </div>
+        <div>
+        <label>Límite</label>
+        <select id="fLimit">
+            <option value="50">50</option>
+            <option value="100" selected>100</option>
+            <option value="200">200</option>
+            <option value="500">500</option>
+        </select>
+        </div>
+    </div>
+    <div class="au-meta">
+        <div id="metaInfo" class="muted">—</div>
+        <div class="au-pager">
+        <button id="btnPrev" class="au-btn secondary">Anterior</button>
+        <button id="btnNext" class="au-btn secondary">Siguiente</button>
+        </div>
+    </div>
+    <div class="au-table-wrap">
+        <table class="au-table">
+            <thead>
+                <tr>
+                <th>FECHA</th>
+                <th>ROL</th>
+                <th>RESPONSABLE</th>
+                <th>CORREO</th>
+                <th>ACCIÓN</th>
+                <th>DESCRIPCIÓN</th>
+                </tr>
+            </thead>
+            <tbody id="tblBody"></tbody>
+        </table>
+    </div>
+</div>
+<div id="empty" class="muted" style="display:none; margin-top:10px;">
+    No hay registros con esos filtros.
+</div>
+<script src="{{ url_for('static', path='js/auditoria.js') }}"></script>
+{% endblock %}

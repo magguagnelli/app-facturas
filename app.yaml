@@ -1,0 +1,52 @@
+command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+ 
+# Dependencias especificadas en requirements.txt# Se instalarán automáticamente desde requirements.txt# Asegúrate de tener el archivo requirements.txt en el mismo directorio
+ 
+instance_class: F2
+ 
+automatic_scaling:
+  target_cpu_utilization: 0.65
+  min_instances: 1
+  max_instances: 10
+ 
+resources:
+  secret_bd:
+    type: secret
+    scope: facturasapp
+    key: DB_DSN
+    permission: CAN_READ
+ 
+  secret_cfdi:
+    type: secret
+    scope: facturasapp
+    key: CFDI_XSD_PATH
+    permission: CAN_READ
+ 
+  secret_debug:
+    type: secret
+    scope: facturasapp
+    key: DEBUG
+    permission: CAN_READ
+ 
+  secret_key:
+    type: secret
+    scope: facturasapp
+    key: SECRET_KEY
+    permission: CAN_READ
+ 
+env:
+  - name: DB_DSN
+    valueFrom: secret_bd
+ 
+  - name: CFDI_XSD_PATH
+    valueFrom: secret_cfdi  
+ 
+  - name: DEBUG
+    valueFrom: secret_debug
+     
+  - name: SECRET_KEY
+    valueFrom: secret_key
+ 
+artifacts:
+  - path: .
+ 

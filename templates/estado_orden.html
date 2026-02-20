@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Estado de orden{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/auditoria.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="titSecciones left">
+    <h2>Catálogo de Entidades Federativas</h2>
+</div>
+<div class="row w-100"></div>
+<div class="au-container">
+  <div class="au-head">
+    <button id="btnNuevo" class="au-btn">
+        <i class="fa fa-plus" aria-hidden="true"></i>&nbsp;Nuevo Estatus del Contrato
+    </button>
+  </div>
+
+  <div class="au-table-wrap">
+    <table class="au-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Estatus general</th>
+          <th>Estatus reporte</th>
+          <th>Estado resumen</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tbl"></tbody>
+    </table>
+  </div>
+
+  <div id="empty" class="pv-muted" style="display:none; margin-top:10px;">Sin registros.</div>
+</div>
+  <!-- Modal -->
+  <div id="modalBg" class="pv-modal-bg" style="display:none;">
+    <div class="pv-modal">
+      <div class="pv-modal-head">
+        <div>
+          <div class="pv-modal-title" id="modalTitle">Estado orden</div>
+          <div class="pv-muted" id="modalMsg">—</div>
+        </div>
+        <button id="btnCerrar" class="pv-btn">
+            <i class="fa fa-times" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <form id="form" class="pv-form">
+        <input type="hidden" id="id">
+
+        <label>Estatus general</label>
+        <input id="estatus_general" maxlength="30" required>
+
+        <label>Estatus reporte</label>
+        <input id="estatus_reporte" maxlength="30" required>
+
+        <label>Estado resumen</label>
+        <input id="estado_resumen" maxlength="30" required>
+
+        <div class="pv-actions">
+          <button type="submit" class="au-btn" id="btnGuardar">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', path='js/estado_orden.js') }}"></script>
+{% endblock %}

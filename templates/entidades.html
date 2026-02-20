@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Entidades Federativas{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/auditoria.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="titSecciones left">
+    <h2>Catálogo de Entidades Federativas</h2>
+</div>
+<div class="row w-100"></div>
+<div class="au-container">
+    <div class="au-head">
+        <div class="au-actions">
+            <button id="btnNuevo" class="au-btn">
+                <i class="fa fa-plus" aria-hidden="true"></i>&nbsp;Nueva Entidad
+            </button>
+        </div>
+    </div>
+    <div class="au-table-wrap">
+        <table class="au-table">
+            <thead>
+                <tr>
+                <th>ID INEGI</th>
+                <th>Nombre</th>
+                <th>Estatus</th>
+                <th>Editar</th>
+                </tr>
+            </thead>
+            <tbody id="tbl"></tbody>
+        </table>
+    </div>
+</div>
+<div id="modalBg" class="pv-modal-bg" style="display:none;">
+  <div class="pv-modal">
+    <h3 id="modalTitle">Entidad</h3>
+    <form id="form" class="pv-form">
+      <input id="id" maxlength="2" placeholder="ID (2 chars)" required>
+      <input id="nombre" placeholder="Nombre" required>
+      <select id="estatus">
+        <option value="ACTIVO">ACTIVO</option>
+        <option value="INACTIVO">INACTIVO</option>
+      </select>
+      <button type="submit" class="au-btn">Guardar</button>
+    </form>
+  </div>
+</div>
+
+<script src="{{ url_for('static', path='js/entidades.js') }}"></script>
+{% endblock %}

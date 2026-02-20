@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% block title %}Alta CFDI{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/cfdi.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="row w-100"></div>
+<div class="au_container">
+  <div class="au_header">
+    <div>
+      <h3 class="au_title verde_t">Editar de CFDI</h3>
+    </div>
+    <div class="au_actions">
+      <a class="au_btn au_btn_secondary" href="/cfdi">← Volver</a>
+    </div>
+  </div>
+  <div class="au_panel au-panel-form" id="au_formBox" style="margin-top:14px;">
+    <h4 class="au_h4 verde_t">Nota: Los campos con * son obligatorios</h4>
+    <form id="au_editForm" class="au_form">
+      <div class="au_grid">
+        <div class="au_form_actions">
+          <button class="au_btn" type="submit">Actualizar CFDI</button>
+        </div>
+      </div>
+      <div id="au_altaMsg" class="au_muted"></div>
+      <div class="row w-20"></div>
+      
+      <!--Tabs de formulario-->
+      <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="contrato-tab" data-bs-toggle="tab" data-bs-target="#contrato" type="button" role="tab" aria-controls="home" aria-selected="true">
+            Información Contrato
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="cfdi-tab" data-bs-toggle="tab" data-bs-target="#cfdi" type="button" role="tab" aria-controls="cfdi" aria-selected="false">
+            Información del CFDI
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="adicionales-tab" data-bs-toggle="tab" data-bs-target="#adicionales" type="button" role="tab" aria-controls="adicionales" aria-selected="false">
+            Información Complementaria
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="facturacion-tab" data-bs-toggle="tab" data-bs-target="#facturacion" type="button" role="tab" aria-controls="facturacion" aria-selected="false">
+            Facturación
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="devolucion-tab" data-bs-toggle="tab" data-bs-target="#devolucion" type="button" role="tab" aria-controls="devolucion" aria-selected="false">
+            Devolución
+          </button>
+        </li>
+      </ul>
+      <div class="row w-20"></div>
+      <!--contrato-->
+      <div class="tab-content" id="myTabContent">
+        <div class="tab-pane fade show active" id="contrato" role="tabpanel" aria-labelledby="contrato-tab">
+          <div class="au_grid">
+          </div>
+          <div class="au_grid">
+            <div>
+              <label class="au_label">Contrato</label>
+              <input  class="au_input"  type="text" value="{{data['item']['num_contrato']}}" readonly>
+            </div>
+            <div>
+              <label class="au_label">Tipo de contrato</label>
+              <input class="au_input" id="au_tipo_contrato" value="{{data['item']['tipo_de_contrato']}}" readonly>
+            </div>
+            <div>
+              <label class="au_label">Partida</label>
+              <input class="au_input" id="au_partida" value="{{data['item']['partida_especifica']}}" readonly>
+            </div>
+            <div>
+              <label class="au_label">Mes servicio</label>
+              <input class="au_input" id="au_mes_servicio" value="{{data['item']['mes_servicio']}}" readonly>
+            </div>
+            <div>
+                <label class="au_label">Estatus Administrativo*</label>
+                <select class="au_input" id="au_estatus_os" name="estatus_os">
+                    {% for os in data["estados_os"]["items"] %}
+                        <option value="{{ os['id'] }}"
+                            {% if data['item'] and os['id'] == data['item']['status_os'] %}
+                                selected
+                            {% endif %}>
+                            {{ os["estatus_general"] }} - {{ os["estatus_reporte"] }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+              <label class="au_label">Fecha de captura</label>
+              <input class="au_input" id="au_fecha_captura" type="date" value="{{data['item']['fecha_captura']}}" readonly>
+            </div>
+            <div>
+              <label class="au_label">RFC Emisor</label>
+              <input class="au_input" id="au_proveedor_rfc" value="{{data['item']['proveedor_rfc']}}" readonly>
+            </div>
+            <div>
+              <label class="au_label">Razón Social</label>
+              <input class="au_input" id="au_razon" value="{{data['item']['proveedor_razon']}}" readonly>
+            </div>
+          </div>
+        </div>
+      <!--CFDI-->
+        <div class="tab-pane fade" id="cfdi" role="tabpanel" aria-labelledby="cfdi-tab">
+          <div class="au_grid">
+            <div>
+              <label class="au_label">Folio Fiscal (UUID)</label>
+              <input class="au_input" id="au_uuid" type="text" value="{{data['item']['uuid']}}" readonly>
+            </div>
+            <div>
+              <label class="au_label">Fecha factura</label>
+              <input class="au_input" id="au_fecha_factura" type="text" value="{{data['item']['fecha_emision']}}" readonly>
+            </div>
+            <div>
+              <label class="au_label">Monto sin IVA (MNX)</label>
+              <input class="au_input" id="au_monto_siniva" value="{{data['item']['monto_siniva']}}" readonly>
+            </div>
+            <div>
+              <label class="au_label">IVA (MNX)</label>
+              <input class="au_input" id="au_iva" value="{{data['item']['iva']}}" readonly>
+            </div>
+            <div>
+              <label class="au_label">Monto con IVA (MNX)</label>
+              <input class="au_input" id="au_monto_c_iva" value="{{data['item']['monto_c_iva']}}" readonly>
+            </div>
+            <div>
+              <label class="au_label">ISR (MNX)</label>
+              <input class="au_input" id="au_isr"  value="{{data['item']['isr']}}" readonly>
+            </div>
+            <div>
+              <label class="au_label">Monto de la partida*</label>
+              <input class="au_input" id="au_monto_partida" value="{{data['item']['monto_partida']}}" >
+              <label class="au_label">Si la factura no es multipartida, debe ingresar el Monto con IVA</label>
+            </div>
+            <div>
+              <label class="au_label">IEPS (MNX)</label>
+              <input class="au_input" id="au_ieps" value="{{ data['item']['ieps'] if data['item']['ieps'] is not none else '0' }}" >
+            </div>
+            <div>
+              <label class="au_label">Descuento (MNX)</label>
+              <input class="au_input" id="au_descuento" value="{{ data['item']['descuento'] if data['item']['descuento'] is not none else '0' }}" >
+            </div>
+            <div>
+              <label class="au_label">Otras contribuciones (MNX)</label>
+              <input class="au_input" id="au_otras" value="{{ data['item']['otras_contribuciones'] if data['item']['otras_contribuciones'] is not none else '0' }}">
+            </div>
+            <div>
+              <label class="au_label">Retenciones (MNX)</label>
+              <input class="au_input" id="au_retenciones" value="{{ data['item']['retenciones'] if data['item']['retenciones'] is not none else '0' }}">
+            </div>
+            <div>
+              <label class="au_label">Penalización (MNX)</label>
+              <input class="au_input" id="au_penalizacion" value="{{ data['item']['penalizacion'] if data['item']['penalizacion'] is not none else '0' }}">
+            </div>
+            <div>
+              <label class="au_label">Deductiva (MNX)</label>
+              <input class="au_input" id="au_deductiva" value="{{ data['item']['deductiva'] if data['item']['deductiva'] is not none else '0' }}">
+            </div>
+            <div>
+              <label class="au_label">Importe pago (MNX)</label>
+              <input class="au_input" id="au_importe_pago" value="{{data['item']['importe_pago']}}" readonly>
+            </div>
+            <div><label class="au_label">Importe p/compromiso</label><input class="au_input" id="au_importe_comp" ></div>
+          </div>
+          <div style="margin-top:10px;">
+              <label class="au_label">Observaciones CFDI</label>
+              <textarea class="au_input" id="au_obs_cfdi" rows="2">{{ data['item']['observaciones'] if data['item']['observaciones'] is not none else '' }}</textarea>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="adicionales" role="tabpanel" aria-labelledby="adicionales-tab">
+          <div class="au_grid">
+            <div><label class="au_label">Orden de suministro</label><input class="au_input" id="au_orden_suministro" ></div>
+            <div><label class="au_label">Fecha solicitud</label><input class="au_input" id="au_fecha_orden" type="date" ></div>
+            <div><label class="au_label">Folio oficio</label><input class="au_input" id="au_folio_oficio" maxlength="20" ></div>
+            <div><label class="au_label">Folio interno</label><input class="au_input" id="au_folio_interno" maxlength="20"></div>
+            <div><label class="au_label">Cuenta bancaria</label><input class="au_input" id="au_cuenta_bancaria" maxlength="30"></div>
+            <div><label class="au_label">Banco</label><input class="au_input" id="au_banco" maxlength="20" ></div>
+            
+            <div><label class="au_label">No. compromiso</label><input class="au_input" id="au_no_comp" type="number" ></div>
+            
+            <!--restantes-->
+            <div><label class="au_label">Validación</label><input class="au_input" id="au_validacion"  ></div>
+            <div><label class="au_label">5 millar</label><input class="au_input" id="au_5millar"  ></div>
+            <div><label class="au_label">r iva</label><input class="au_input" id="au_riva"  ></div>
+            <div><label class="au_label">r isr</label><input class="au_input" id="au_risr"  ></div>
+            <div><label class="au_label">Solicitud</label><input class="au_input" id="au_solicitud"  ></div>
+            <div><input class="au_input" id="au_archivo" maxlength="100" type="hidden"></div>
+          </div>
+          <div style="margin-top:10px;">
+            <label class="au_label">Observaciones Adicionales</label>
+            <textarea class="au_input" id="au_obs_os" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="facturacion" role="tabpanel" aria-labelledby="facturacion-tab">
+          <div class="au_grid">
+            <div><label class="au_label">Fecha de Fiscalización</label><input class="au_input" id="au_fecha_fiscalizacion" ></div>
+            <div><label class="au_label">Fiscalizador</label><input class="au_input" id="au_fiscalizador" ></div>
+            <div><label class="au_label">Responsable DOC FIS</label><input class="au_input" id="au_responsable_fis" ></div>
+            <div><label class="au_label">Fecha de Carga en SICOP</label><input class="au_input" id="au_fecha_carga_sicop" ></div>
+            <div><label class="au_label">Responsable de carga en SICOP</label><input class="au_input" id="au_responsable_carga_sicop" ></div>
+            <div><label class="au_label">Número de Solicitud de Pago</label><input class="au_input" id="au_numero_solicitud_pago" ></div>
+            <div><label class="au_label">CLC</label><input class="au_input" id="au_clc" ></div>
+            <div><label class="au_label">Estatus SIAF</label>
+              <select class="au_input" id="au_estatus_siaf" name="au_estatus_siaf">
+                    {% for siaf in data["estados_siaf"]["items"] %}
+                        <option value="{{ siaf['id'] }}"
+                            {% if data and siaf['id'] == data['item']['status_siaf'] %}
+                                selected
+                            {% endif %}>
+                            {{ siaf["estatus"] }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div><label class="au_label">Fecha pago</label><input class="au_input" id="au_fecha_pago" type="date"></div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="devolucion" role="tabpanel" aria-labelledby="devolucion-tab">
+          <div class="au_grid">
+            <div><label class="au_label">Oficio Devolución</label><input class="au_input" id="au_oficio_dev" ></div>
+            <div><label class="au_label">Fecha de Devolución</label><input class="au_input" id="au_fecha_dev" type="date" ></div>
+          </div>
+          <div><label class="au_label">Motivo de Devolución</label><textarea class="au_input" id="au_motivo_dev" rows="4" ></textarea></div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

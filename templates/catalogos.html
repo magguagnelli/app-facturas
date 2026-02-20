@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Carga Masiva de Catálogos{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/facturas.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="titSecciones left">
+    <h2>CARGA MASIVA DE CATÁLOGOS</h2>
+</div>
+<div class="row w-100"></div>
+
+<section class="fx-panel">
+  <div class="accordion-header">
+    <div class="sec-icon verde"><span class="s-verde"></span></div>
+    <h3>Subir Excel</h3>
+  </div>
+
+  <div class="fx-divider"></div>
+
+  <div class="fx-muted" style="margin-bottom:10px;">
+    El Excel debe contener las hojas: <b>Área, Proveedor, Usuario, Contrato, Partida, Orden</b>.
+  </div>
+
+  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <input id="fileExcel" type="file" accept=".xlsx,.xls" />
+    <button id="btnUpload" class="fx-btn fx-btn-sm">
+      <i class="fa fa-upload" aria-hidden="true"></i> Cargar
+    </button>
+    <span class="fx-muted" id="uploadMsg">—</span>
+  </div>
+
+  <div class="fx-divider" style="margin-top:15px;"></div>
+
+  <div id="resultBox" style="display:none;">
+    <h4>Resultado</h4>
+
+    <div class="fx-muted" id="resultSummary"></div>
+
+    <div style="overflow:auto; margin-top:10px;">
+      <table class="fx-table" style="width:100%;">
+        <thead>
+          <tr>
+            <th>Hoja</th>
+            <th>Insertados</th>
+            <th>Actualizados</th>
+            <th>Errores</th>
+          </tr>
+        </thead>
+        <tbody id="summaryTbody"></tbody>
+      </table>
+    </div>
+
+    <div id="errorsBox" style="margin-top:15px; display:none;">
+      <h4>Errores por fila</h4>
+      <div class="fx-muted">Se muestran hasta 2000 errores.</div>
+      <div style="overflow:auto; margin-top:10px;">
+        <table class="fx-table" style="width:100%;">
+          <thead>
+            <tr>
+              <th>Hoja</th>
+              <th>Fila</th>
+              <th>Error</th>
+            </tr>
+          </thead>
+          <tbody id="errorsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="notesBox" style="margin-top:15px; display:none;">
+      <h4>Notas</h4>
+      <ul id="notesList"></ul>
+    </div>
+  </div>
+</section>
+
+<script src="{{ url_for('static', path='js/catalogos.js') }}"></script>
+{% endblock %}

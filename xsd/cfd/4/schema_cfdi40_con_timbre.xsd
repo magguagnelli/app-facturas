@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Importa el esquema principal CFDI 4.0 -->
+  <xs:import
+    namespace="http://www.sat.gob.mx/cfd/4"
+    schemaLocation="cfdv40.xsd"/>
+
+  <!-- Importa el esquema del Timbre Fiscal Digital -->
+  <xs:import
+    namespace="http://www.sat.gob.mx/TimbreFiscalDigital"
+    schemaLocation="TimbreFiscalDigitalv11.xsd"/>
+
+<!-- Importa el esquema de Tipo de Datos -->
+  <!--xs:import
+    namespace="http://www.sat.gob.mx/TimbreFiscalDigital"
+    schemaLocation="tdCFDI.xsd"/>
+
+< Importa el esquema de Catalogo >
+  <xs:import
+    namespace="http://www.sat.gob.mx/TimbreFiscalDigital"
+    schemaLocation="catCFDI.xsd"/-->
+
+</xs:schema>

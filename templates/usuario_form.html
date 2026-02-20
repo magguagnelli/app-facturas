@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == "create" %}Crear usuario{% else %}Editar usuario{% endif %}{% endblock %}
+
+{% block content %}
+  <div class="titSecciones left">
+    <h2>{% if mode == "create" %}Crear nuevo usuario{% else %}Editar usuario{% endif %}</h2>
+  </div>
+  <div class="row w-100">
+     {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+  </div>
+  <div class="bodyForm col-3">
+    <div class="subenun">
+        <p class="subtit verde_t">Los campos con * son obligatorios</p>
+        <span></span>
+    </div>
+    <form class="limit-sec row" method="post" action="{% if mode == 'create' %}/usuarios/nuevo{% else %}/usuarios/{{ user_id }}/editar{% endif %}" style="margin-top:12px;">
+      <div class="col-lg-4 col-md-6 col-sm-12 col-12 h40">
+        <label class="titForm verde_t">Correo (@imssbienestar.gob.mx)*</label>
+        <input id="correo" name="correo" type="email" required value="{{ form.correo }}" class="form-control form-basic">
+      </div>
+      <div class="col-lg-4 col-md-6 col-sm-12 col-12 h40">
+        <label class="titForm verde_t">Nombre*</label>
+        <input id="nombre" name="nombre" type="text" required value="{{ form.nombre }}" class="form-control form-basic">
+      </div>
+      <div class="col-lg-4 col-md-6 col-sm-12 col-12 h40">
+        <label class="titForm verde_t">Rol*</label>
+       <select id="rol" name="rol" required class="form-select form-basic">
+        <option value="CAPTURISTA" {% if form.rol == "CAPTURISTA" %}selected{% endif %}>CAPTURISTA</option>
+        <option value="ADMIN" {% if form.rol == "ADMIN" %}selected{% endif %}>ADMIN</option>
+      </select>
+      </div>
+      <div class="col-lg-4 col-md-6 col-sm-12 col-12 h40">
+        <label class="titForm verde_t">Estatus</label>
+        <select id="estatus" name="estatus" required  class="form-select form-basic">
+          <option value="ACTIVO" {% if form.estatus == "ACTIVO" %}selected{% endif %}>ACTIVO</option>
+          <option value="INACTIVO" {% if form.estatus == "INACTIVO" %}selected{% endif %}>INACTIVO</option>
+        </select>
+      </div>
+      {% if mode == "create" %}
+      <div class="col-lg-4 col-md-6 col-sm-12 col-12 h40">
+        <label class="titForm verde_t">Contraseña inicial</label>
+        <input id="password" name="password" type="password" required placeholder="Mínimo 8 caracteres" class="form-control form-basic">
+      </div>
+      {% endif %}
+      <div class="col-6 t-c">
+        <button type="button" >
+        <a class="btnReg verde_t" href="/usuarios">
+          <div class="btnIcon">
+            <p>&nbsp;&nbsp;&nbsp;REGRESAR</p>
+            <div class="boxIcon verde"><img src="{{ url_for('static', path='img/REGRESAR.svg') }}"></div>
+            <span class="s-verde"></span>
+          </div>
+        </a></button>
+      </div> 
+      <div class="col-6 t-c">
+        <button type="button" class="btnReg verde_t" onclick="this.closest('form').submit();">
+          <div class="btnIcon">
+            <p>&nbsp;&nbsp;&nbsp;{% if mode == "create" %}CREAR{% else %}GUARDAR{% endif %}</p>
+            <div class="boxIcon verde"><img src="{{ url_for('static', path='img/continuar.svg') }}"></div>
+            <span class="s-verde"></span>
+          </div>
+        </button>
+      </div>
+    </form>
+</div>  
+{% endblock %}

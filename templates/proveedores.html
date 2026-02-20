@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Proveedores{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/auditoria.css') }}">
+
+{% endblock %}
+
+{% block content %}
+<div class="titSecciones left">
+    <h2>Gestión de proveedores</h2>
+</div>
+<div class="row w-100"></div>
+<div class="bodyForm col-3">
+    <div class="subenun">
+        <p class="verde_t"><b>Buscar</b></p>
+        <span></span>
+    </div>
+</div>
+<div class="au-container">
+  <div class="au-head">
+    <div class="au-actions">
+      <input id="q" class="au-filters" placeholder="Buscar por RFC / razón social / comercial">
+      <button id="btnBuscar" class="au-btn">
+        <i class="fa fa-search" aria-hidden="true"></i>
+      </button>
+      <button id="btnNuevo" class="au-btn">
+         <i class="fa fa-plus" aria-hidden="true"></i>Nuevo
+      </button>
+    </div>
+  </div>
+
+  <div class="au-table-wrap">
+    <table class="au-table">
+      <thead>
+        <tr>
+          <th>RFC</th>
+          <th>Razón social</th>
+          <th>Comercial</th>
+          <th>Tipo</th>
+          <th>Estatus</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tbl"></tbody>
+    </table>
+  </div>
+
+  <div id="empty" class="muted" style="display:none; margin-top:10px;">No hay Proveedores registrados.</div>
+
+  <!-- Modal -->
+  <div id="modalBg" class="pv-modal-bg" style="display:none;">
+    <div class="pv-modal">
+      <div class="pv-modal-head">
+        <div>
+          <div class="pv-modal-title" id="modalTitle">Proveedor</div>
+          <div class="rojo_t" id="modalMsg">—</div>
+        </div>
+        <button id="btnCerrar" class="pv-btn secondary">Cerrar</button>
+      </div>
+
+      <form id="form" class="pv-form">
+        <input type="hidden" id="id">
+
+        <div class="pv-grid">
+          <div>
+            <label>RFC</label>
+            <input id="rfc" maxlength="13" required>
+          </div>
+          <div>
+            <label>Tipo persona</label>
+            <select id="tipo_persona" required>
+              <option value="FISICA">FISICA</option>
+              <option value="MORAL">MORAL</option>
+              <option value="CONSORCIO">CONSORCIO</option>
+            </select>
+          </div>
+          <div class="span2">
+            <label>Razón social</label>
+            <input id="razon_social" maxlength="300" required>
+          </div>
+          <div class="span2">
+            <label>Nombre comercial</label>
+            <input id="nombre_comercial" maxlength="300">
+          </div>
+          <div>
+            <label>Teléfono</label>
+            <input id="telefono" maxlength="15">
+          </div>
+          <div>
+            <label>Email</label>
+            <input id="email" maxlength="100" type="email">
+          </div>
+          <div>
+            <label>Estatus</label>
+            <select id="estatus">
+              <option value="ACTIVO">ACTIVO</option>
+              <option value="INACTIVO">INACTIVO</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pv-form-actions">
+          <button type="submit" class="pv-btn" id="btnGuardar">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>  
+<script src="{{ url_for('static', path='js/proveedores.js') }}"></script>
+{% endblock %}

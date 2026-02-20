@@ -1,0 +1,423 @@
+# services/cfdi_service.py
+from __future__ import annotations
+
+import os
+from datetime import datetime, date
+from typing import Any, Dict, List, Optional
+
+from core.db import get_conn
+from core.cfdi_core import build_validation_checklist, extract_cfdi_fields
+from core.audit import audit, build_log
+
+DEBUG = os.getenv("DEBUG", "0") == "1"
+
+def _get_id(row):
+    if row is None:
+        return None
+    if isinstance(row, (tuple, list)):
+        return row[0] if len(row) else None
+    if isinstance(row, dict): 
+        return row.get("id") or row.get("ID")
+    try:
+        return row["id"]
+    except Exception:
+        return None
+
+def _to_date(s: str) -> Optional[date]:
+    s = (s or "").strip()
+    if not s:
+        return None
+    return datetime.fromisoformat(s).date()
+
+def list_facturas(q: str = "") -> List[Dict[str, Any]]:
+    """
+    Lista CFDI (facturas) con proveedor y OS/partida/contrato para flags.
+    """
+    q = (q or "").strip()
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            sql = """
+            SELECT
+              c.id as cfdi_id,
+              c.uuid,
+              c.rfc_emisor,
+              c.fecha_emision,
+              c.fecha_recepcion,
+              c.estatus as cfdi_estatus,
+              c.orden_suministro as os_id,
+
+              os.partida as partida_id,
+              p.contrato as contrato_id,
+
+              pr.id as proveedor_id,
+              pr.rfc as proveedor_rfc,
+              pr.razon_social as proveedor_razon,
+
+              p.partida_especifica as partida,
+              ct.num_contrato as contrato,
+              ct.tipo_de_contrato,
+              eo.estatus_reporte,
+
+              CASE WHEN os.partida IS NOT NULL THEN TRUE ELSE FALSE END as os_tiene_partida,
+              CASE WHEN p.id IS NOT NULL THEN TRUE ELSE FALSE END as partida_existe,
+              CASE WHEN ct.id IS NOT NULL THEN TRUE ELSE FALSE END as contrato_existe
+            FROM cat_facturas.cfdi c
+            LEFT JOIN cat_facturas.orden_suministro os ON os.id = c.orden_suministro
+            LEFT JOIN cat_facturas.estado_orden eo ON eo.id = os.estatus
+            LEFT JOIN cat_facturas.partida p ON p.id = os.partida
+            LEFT JOIN cat_facturas.contrato ct ON ct.id = p.contrato
+            LEFT JOIN cat_facturas.proveedor pr ON pr.id = os.proveedor
+            WHERE 1=1
+            """
+            params = []
+            if q:
+                sql += " AND (c.uuid ILIKE %s OR c.rfc_emisor ILIKE %s OR pr.rfc ILIKE %s OR pr.razon_social ILIKE %s)"
+                like = f"%{q}%"
+                params += [like, like, like, like]
+            sql += " ORDER BY c.id DESC LIMIT 500"
+
+            cur.execute(sql, params)
+            cols = [d[0] for d in cur.description]
+            out = []
+            for row in cur.fetchall():
+                if isinstance(row, dict):
+                    out.append(row)
+                else:
+                    out.append(dict(zip(cols, row)))
+            return out
+
+def get_factura_detalle(cfdi_id: int) -> Optional[Dict[str, Any]]:
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+            SELECT
+              c.*,
+              os.*,
+              p.*,
+              ct.*,
+              os.estatus status_os,
+              pr.rfc as proveedor_rfc,
+              pr.razon_social as proveedor_razon
+            FROM cat_facturas.cfdi c
+            LEFT JOIN cat_facturas.orden_suministro os ON os.id = c.orden_suministro
+            LEFT JOIN cat_facturas.partida p ON p.id = os.partida
+            LEFT JOIN cat_facturas.contrato ct ON ct.id = p.contrato
+            LEFT JOIN cat_facturas.proveedor pr ON pr.id = os.proveedor
+            WHERE c.id=%s
+            """, (cfdi_id,))
+            row = cur.fetchone()
+            if not row: 
+                return None
+            # Nota: aquí devolvemos “crudo” por ser modal informativo
+            if isinstance(row, dict):
+                return row
+            cols = [d[0] for d in cur.description]
+            print(row)
+            return dict(zip(cols, row))
+  
+def list_contratos() -> List[Dict[str, Any]]:
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT id, num_contrato, rfc_pp, ejercicio, mes, tipo_de_contrato FROM cat_facturas.contrato WHERE estatus='ACTIVO' ORDER BY id DESC")
+            cols = [d[0] for d in cur.description]
+            items = [dict(r) for r in cur.fetchall()]
+            #print(items)
+            return items 
+
+def list_partidas_by_contrato(contrato_id: int) -> List[Dict[str, Any]]:
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, partida_especifica, des_pe, monto_total
+                FROM cat_facturas.partida
+                WHERE contrato=%s
+                ORDER BY id DESC
+            """, (contrato_id,))  
+            #cols = [d[0] for d in cur.description]
+            return [dict(r) for r in cur.fetchall()]
+
+def validate_cfdi(xml_bytes: bytes) -> Dict[str, Any]:
+    checklist = build_validation_checklist(xml_bytes)
+
+    extracted = checklist.get("extracted") or {}
+    rfc_emisor = extracted.get("rfc_emisor")
+    uuid = extracted.get("uuid")
+
+    # 1) RFC existe en proveedor
+    rfc_ok = False
+    rfc_msg = "RFC emisor no detectado en XML."
+    if rfc_emisor:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id FROM cat_facturas.proveedor WHERE rfc=%s LIMIT 1", (rfc_emisor,))
+                hit = cur.fetchone()
+                rfc_ok = bool(_get_id(hit))
+                rfc_msg = "RFC existe en catálogo de proveedores." if rfc_ok else "RFC NO existe en catálogo de proveedores."
+    checklist["rfc_ok"] = rfc_ok
+    checklist["messages"].append(rfc_msg)
+
+    # 2) UUID no duplicado
+    uuid_ok = False
+    uuid_msg = "UUID no detectado en XML."
+    if uuid:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id FROM cat_facturas.cfdi WHERE uuid=%s LIMIT 1", (uuid,))
+                hit = cur.fetchone()
+                if hit:
+                    uuid_ok = False
+                    uuid_msg = f"UUID ya registrado (cfdi.id={_get_id(hit)})."
+                else:
+                    uuid_ok = True
+                    uuid_msg = "UUID no existe en BD (OK)."
+
+    checklist["uuid_ok"] = uuid_ok
+    checklist["messages"].append(uuid_msg)
+
+    checklist["ok"] = bool(
+        checklist.get("xml_ok") and checklist.get("xsd_ok") and checklist.get("timbre_ok")
+        and rfc_ok and uuid_ok
+    )
+    return checklist
+
+
+def create_factura_and_os(
+    actor_email: str,
+    log: str,
+     #Contrato
+    partida_id: int,
+    mes_servicio: str,
+    estatus_os: int, #estatus Administrativo
+    
+    #CFDI
+    xml_bytes: bytes,
+    proveedor_id: int,
+    fecha_recepcion: str,#Fecha recepcion CFDI y fecha de captura
+    monto_partida: float,    
+    ieps: float,
+    descuento: float,
+    otras_contribuciones: float,
+    retenciones: float,
+    penalizacion: float,
+    deductiva: float,
+    importe_pago: float,
+    fecha_captura: Optional[str] = None,
+    observaciones_cfdi: Optional[str] = None,
+
+    #Complementaria
+    orden_suministro: Optional[str] = None,
+    fecha_solicitud: Optional[str] = None,
+    folio_oficio: Optional[str] = None,
+    folio_interno: Optional[str] = None,
+    cuenta_bancaria: Optional[str] = None,
+    banco: Optional[str] = None,   
+    importe_p_compromiso: Optional[float] = 0,
+    no_compromiso: Optional[int] = 0,
+    fecha_pago: Optional[str] = None,
+    validacion: Optional[str] = None,
+    cincomillar: Optional[str] = None,
+    riva: Optional[str] = None,
+    risr: Optional[str] = None,
+    solicitud: Optional[str] = None,
+    observaciones_os: Optional[str] =None,
+    archivo: Optional[str] = None,
+    
+    #facturacion
+    fecha_fiscalizacion: Optional[str] = None,
+    fiscalizador: Optional[str] = None,
+    responsable_fis: Optional[str] = None,
+    fecha_carga_sicop: Optional[str] = None,
+    responsable_carga_sicop: Optional[str] = None,
+    numero_solicitud: Optional[str] = None,
+    clc: Optional[str] = None,
+    estatus_siaf: Optional[str] = None,
+
+    #devolucion
+    oficio_dev: Optional[str] = None,
+    fecha_dev: Optional[str] = None,
+    motivo_dev: Optional[str] = None,
+    
+) -> Dict[str, Any]:
+    # Extrae del XML ORIGINAL (incluye timbre)
+    extracted = extract_cfdi_fields(xml_bytes)
+    #Datos de factura
+    uuid = extracted.get("uuid")
+    rfc_emisor = extracted.get("rfc_emisor")
+    fecha_emision = extracted.get("fecha_emision")#fecha_factura
+    monto_siniva = extracted.get("subtotal")
+    iva = extracted.get("iva")
+    monto_c_iva = extracted.get("con_iva")
+    isr = extracted.get("isr")
+    
+    if not uuid:
+        return {"ok": False, "message": "No se pudo extraer UUID."}
+    if not rfc_emisor:
+        return {"ok": False, "message": "No se pudo extraer RFC."}
+    if not fecha_emision:
+        return {"ok": False, "message": "No se pudo extraer Fecha del CFDI."}
+    if not proveedor_id:
+        return {"ok": False, "message": "El Proveedor no està registrado."}
+    if partida_id == 0:
+        return {"ok": False, "message": "No ha seleccionado una partida"}
+    
+    xml_str = xml_bytes.decode("utf-8", errors="replace")  
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # crea OS
+            cur.execute("""
+                INSERT INTO cat_facturas.orden_suministro
+                (partida, proveedor, fecha_orden, folio_oficio, fecha_factura, folio_interno, 
+                cuenta_bancaria, banco, mes_servicio, monto_siniva, iva, monto_c_iva, isr, ieps, 
+                descuento, otras_contribuciones, retenciones, penalizacion, deductiva, 
+                importe_pago, importe_p_compromiso, no_compromiso,  
+                estatus, fecha_pago, archivo, 
+                orden_suministro, validacion, _5millar, riva, risr, solicitud, observaciones, 
+                fecha_fiscalizacion, fiscalizador, fecha_carga_sicop, responsable_carga_sicop,
+                numero_solicitud_pago, clc, estatus_siaff, responsable_fis, 
+                oficio_dev, fecha_dev, motivo_dev)
+                VALUES
+                (%s,%s,%s,%s,%s,%s,
+                %s,%s,%s,%s,%s,%s,%s,%s,
+                %s,%s,%s,%s,%s,
+                %s,%s,%s,
+                %s,%s,%s,
+                %s,%s,%s,%s,%s,%s,%s,
+                %s,%s,%s,%s,
+                %s,%s,%s,%s,
+                %s,%s,%s)
+                RETURNING id
+            """, (
+                partida_id, proveedor_id, _to_date(fecha_solicitud), folio_oficio, fecha_emision, folio_interno,
+                cuenta_bancaria, banco, mes_servicio, monto_siniva, iva, monto_c_iva, isr, (ieps or None),
+                (descuento or None), (otras_contribuciones or None), (retenciones or None), (penalizacion or None), (deductiva or None),
+                importe_pago, (importe_p_compromiso or None), (no_compromiso or None),
+                estatus_os, None if fecha_pago is None else _to_date(fecha_pago), (archivo or None),
+                (orden_suministro or None), (validacion or None), (cincomillar or None), (riva or None), (risr or None), (solicitud or None), (observaciones_os or None),
+                _to_date(fecha_fiscalizacion), (fiscalizador or None), _to_date(fecha_carga_sicop), (responsable_carga_sicop or None),
+                (numero_solicitud or None), (clc or None),(estatus_siaf or None),(responsable_fis or None),
+                (oficio_dev or None),_to_date(fecha_dev), (motivo_dev or None)                 
+            ))
+            os_id = cur.fetchone()
+            os_id = _get_id(os_id)
+            
+            audit(
+                correo=actor_email,
+                accion="ALTA Información Complementaria",
+                descripcion=f"Alta Información Complementaria id={os_id}",
+                log_accion=log,
+                seccion="cat_facturas.orden_suministro",
+                id_sec= str(os_id)
+            )
+            
+            # crea CFDI
+            cur.execute("""
+                INSERT INTO cat_facturas.cfdi(
+                orden_suministro, uuid, rfc_emisor, fecha_recepcion, fecha_emision, 
+                onservaciones, xml_factura, monto_total,  estatus, fecha_captura, monto_partida)
+                VALUES(
+                    %s,%s,%s,%s,%s,
+                    %s,%s,%s,%s,%s,%s)
+                RETURNING id
+            """, (
+                os_id, uuid, rfc_emisor, _to_date(fecha_recepcion), fecha_emision, 
+                (observaciones_cfdi or None), xml_str, importe_pago,"ACTIVO", _to_date(fecha_captura), monto_partida
+                )
+            )
+            cfdi_id = _get_id(cur.fetchone())
+            ret = {"ok":True,"message":"UUID: "+uuid+" os_id: "+str(os_id)+" cfdi_id: "+str(cfdi_id)}
+            audit(
+                correo=actor_email,
+                accion="ALTA CFDI",
+                descripcion=f"Alta de CFDI id={cfdi_id}",
+                log_accion=log,
+                seccion="cat_facturas.cfdi",
+                id_sec= str(cfdi_id)
+            )
+        conn.commit()
+    return ret
+    
+
+def update_factura_and_os(
+    *,
+    cfdi_id: int,
+    cfdi_estatus: str,
+    # OS editables (NO editar NOT NULL que tú definiste: se ignoran)
+    partida_id: Optional[int],
+    estatus_os: Optional[int],
+    fecha_pago: Optional[str] = None,
+    fecha_emision: Optional[str] = None,
+    fecha_recepcion: Optional[str] = None,
+    tipo_de_contrato: Optional[str] = None,
+    observaciones_os: Optional[str] = None,
+) -> Dict[str, Any]:
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            # obtener OS padre
+            cur.execute("SELECT orden_suministro FROM cat_facturas.cfdi WHERE id=%s", (cfdi_id,))
+            row = cur.fetchone()
+            if not row:
+                return {"ok": False, "message": "CFDI no encontrado."}
+            os_id = row[0] if not isinstance(row, dict) else row.get("orden_suministro")
+
+            # actualiza CFDI (uuid/rfc/fechas/obs/estatus)
+            cur.execute("""
+                UPDATE cat_facturas.cfdi
+                SET onservaciones=%s,
+                    estatus=%s
+                WHERE id=%s
+            """, (
+                (observaciones_os or None),cfdi_estatus, cfdi_id
+            ))
+
+            # actualiza OS solo campos permitidos + cambio de partida
+            if partida_id:
+                cur.execute("UPDATE cat_facturas.orden_suministro SET partida=%s WHERE id=%s", (partida_id, os_id))
+
+                # si viene tipo_de_contrato, actualizar también contrato
+                if tipo_de_contrato:
+                    cur.execute(
+                        "SELECT contrato FROM cat_facturas.partida WHERE id=%s",
+                        (partida_id,)
+                    )
+                    part_row = cur.fetchone()
+                    if part_row:
+                        contrato_id = part_row[0] if not isinstance(part_row, dict) else part_row.get("contrato")
+                        print("DEBUG: tipo_de_contrato =", tipo_de_contrato)
+                        print("DEBUG: contrato_id =", contrato_id)
+                        if contrato_id:
+                            cur.execute(
+                                "UPDATE cat_facturas.contrato SET tipo_de_contrato=%s WHERE id=%s",
+                                (tipo_de_contrato, contrato_id)
+                            )
+                            #print("DEBUG: actualización ejecutada")
+ 
+            if estatus_os is not None:
+                cur.execute("UPDATE cat_facturas.orden_suministro SET estatus=%s WHERE id=%s", (estatus_os, os_id))
+
+            cur.execute("""
+                UPDATE cat_facturas.orden_suministro
+                SET fecha_pago=%s,
+                    observaciones=%s,
+                    fecha_emision=%s,
+                    fecha_recepcion=%s
+                WHERE id=%s
+            """, (
+                (observaciones_os or None), cfdi_estatus, fecha_emision,
+                fecha_recepcion, cfdi_id
+            )
+        )
+
+        conn.commit()
+
+    return {"ok": True}
+
+
+
+def set_cfdi_estatus(cfdi_id: int, estatus: str) -> Dict[str, Any]:
+    if estatus not in ("ACTIVO", "CANCELADO", "INACTIVO"):
+        return {"ok": False, "message": "Estatus inválido."}
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE cat_facturas.cfdi SET estatus=%s WHERE id=%s", (estatus, cfdi_id))
+            conn.commit()
+    return {"ok": True}

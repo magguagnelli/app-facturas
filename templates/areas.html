@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Catálogo de Áreas{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/auditoria.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="titSecciones left">
+    <h2>CATÁLOGO DE ÁREAS</h2>
+</div>
+<div class="row w-100"></div>
+<div class="au-container">
+    <div class="au-head">
+        <div class="au-actions">
+            <button id="btnBuscarAreas" class="au-btn">
+                <i class="fa fa-search" aria-hidden="true"></i>&nbsp;Buscar
+            </button>
+            <button id="btnNewArea" class="au-btn">
+                <i class="fa fa-plus" aria-hidden="true"></i>&nbsp;Nueva Área
+            </button>
+        </div>
+    </div>
+    <div class="au-filters">
+        <div>
+        <label>Áreas</label>
+        <input id="qAreas" placeholder="Buscar por nombre..." style="min-width:260px;">
+        </div>
+    </div>
+    <div class="au-table-wrap">
+        <div class="au-muted" id="areasMsg" style="display:none;"></div>
+    </div>
+    <div style="overflow:auto;">
+        <table class="au-table" style="width:100%;">
+        <thead>
+            <tr>
+            <th style="width:80px;">ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th style="width:220px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="areasTbody"></tbody>
+        </table>
+        <div id="areasEmpty" class="au-muted" style="display:none; margin-top:10px;">
+            No hay áreas registradas.
+        </div>
+    </div>
+</div>
+
+<!-- Modal Área -->
+<div id="areaModalBg" class="pv-modal-bg" style="display:none;">
+  <div class="pv-modal">
+    <div class="pv-modal-head">
+      <div>
+        <div class="pv-modal-title" id="areaModalTitle">Área</div>
+        <div class="validationMsg" id="areaModalMsg">—</div>
+      </div>
+      <button class="pv-btn pv-btn-sm pv-btn-secondary" id="btnCloseAreaModal">
+        <i class="fa fa-times" aria-hidden="true"></i>
+      </button>
+    </div>
+    <form id="areaForm" class="pv-form">
+      <input type="hidden" id="area_id">
+
+      <div class="pv-grid">
+        <div class="span2">
+          <label>Nombre del área</label>
+          <input id="area_nombre" maxlength="300" required>
+        </div>
+
+        <div class="span2">
+          <label>Descripción</label>
+          <textarea id="area_desc" maxlength="500" rows="4"></textarea>
+        </div>
+      </div>
+
+      <div class="pv-form-actions">
+        <button type="submit" class="au-btn" id="btnSaveArea">Guardar</button>
+        <button type="button" class="au-btn" id="btnCancelArea">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="{{ url_for('static', path='js/areas.js') }}"></script>
+{% endblock %}

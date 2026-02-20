@@ -1,0 +1,222 @@
+/* static/css/cfdi.css */
+.au_container { padding: 12px; color: #191919;}
+.au_header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.au_title { margin:0; }
+.au_subtitle { color:#666; font-size: 13px; margin-top:4px; }
+.au_actions { display:flex; gap:10px; align-items:center; }
+
+.au_toolbar { display:flex; gap:10px; margin-top:12px; }
+.au_input { width:100%; padding:8px 10px; border:1px solid #ddd; border-radius:8px; }
+.au_input_xml { width:80%; padding:8px 10px; border:1px solid #ddd; border-radius:8px;}
+.au_btn { padding:8px 12px; border:0; border-radius:8px; cursor:pointer; background:#2a7; color:white; }
+.au_btn_secondary { background:#eee; color:#222; border:1px solid #ddd; }
+.au_btn_danger { background:#c33; color:white; }
+.au_btn_sm { padding:6px 10px; font-size:12px; border-radius:8px; }
+
+.au_tablewrap { margin-top:12px; border:1px solid #eee; border-radius:10px; overflow:hidden; }
+.au_table { width:100%; border-collapse:collapse; }
+.au_table th, .au_table td { padding:10px; border-bottom:1px solid #f0f0f0; vertical-align:top; }
+.au_table th { background:#fafafa; font-size:12px; color:#333; text-align:left; }
+.au_mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; }
+
+.au_badge { padding:4px 8px; border-radius:999px; font-size:12px; display:inline-block; }
+.au_badge_ok { background:#e9fff2; border:1px solid #a7efc2; color:#116b2d; }
+.au_badge_warn { background:#fff7e6; border:1px solid #ffd38a; color:#7a4a00; }
+.au_badge_neu { background:#f3f3f3; border:1px solid #e1e1e1; color:#444; }
+
+.au_muted { color:#777; font-size:12px; text-align: left; font-weight: bold;}
+
+.au_panel { border:1px solid #eee; border-radius:12px; padding:12px; background:#fff; }
+.au-panel-form{
+    height: 650px;
+    overflow: scroll;
+}
+.au_panel_inner { background:#fafafa; }
+
+.au_grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:10px; }
+@media (max-width: 900px) { .au_grid { grid-template-columns: 1fr; } }
+
+.au_label { 
+    font-size:12px; 
+    color:#444; 
+    display:block; 
+    margin-bottom:6px; 
+    text-align: left;
+    font-weight: bold;
+}
+.au_form_actions { display:flex; gap:10px; margin-top:12px; }
+
+.au_modal_bg { position:fixed; inset:0; background: rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; padding:20px; z-index:999; }
+.au_modal { width:min(980px, 96vw); max-height: 92vh; overflow:auto; background:#fff; border-radius:14px; padding:12px; }
+.au_modal_head { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.au_modal_title { font-weight:700; }
+.au_divider { height:1px; background:#eee; margin:10px 0; }
+.au_pre { background:#0b1020; color:#e7e7e7; padding:12px; border-radius:10px; font-size:12px; overflow:auto; }
+
+.au_checklist { display:flex; gap:10px; flex-wrap:wrap; }
+.au_check { padding:6px 10px; border-radius:999px; border:1px solid #ddd; font-size:12px; }
+.au_ok { background:#e9fff2; border-color:#a7efc2; color:#116b2d; }
+.au_bad { background:#ffecec; border-color:#ffb0b0; color:#7a1111; }
+
+.au_ul { margin:8px 0 0 18px; }
+.au_ul li{
+    list-style-type: none;
+    text-align: left;
+}
+.au_h4 { margin:0; padding:0; }
+
+
+/* Estilos para el detalle del CFDI */
+.au_detail_loading {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.au_detail_error {
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  padding: 20px;
+  color: #c33;
+}
+
+.au_detail_error strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+.au_detail_stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.au_detail_stat {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.au_detail_stat_label {
+  font-size: 12px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.au_detail_stat_value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.au_detail_section {
+  margin-bottom: 30px;
+}
+
+.au_detail_section_title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+}
+
+.au_detail_section_title::before {
+  content: '';
+  width: 4px;
+  height: 18px;
+  background: #667eea;
+  margin-right: 10px;
+  border-radius: 2px;
+}
+
+.au_detail_grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 15px;
+}
+
+.au_detail_field {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #cbd5e0;
+  transition: all 0.2s;
+}
+
+.au_detail_field:hover {
+  background: #f1f5f9;
+  border-left-color: #667eea;
+}
+
+.au_detail_field.au_detail_highlight {
+  background: #fef3c7;
+  border-left-color: #f59e0b;
+}
+
+.au_detail_label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.au_detail_value {
+  font-size: 14px;
+  color: #1e293b;
+  word-break: break-word;
+}
+
+.au_xml_content {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 15px;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  max-height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-top: 10px;
+  border: 1px solid #334155;
+}
+
+/* Ajuste del modal para mejor visualización */
+.au_modal {
+  max-width: 1200px !important;
+}
+
+.au_modal_body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .au_detail_grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .au_detail_stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .au_detail_stat_value {
+    font-size: 20px;
+  }
+}

@@ -1,0 +1,25 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Variables de entorno
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.log
+
+# VSCode
+.vscode/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Databricks
+*.dbc
+.databricks/

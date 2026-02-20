@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Registro de Facturas (CFDI){% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/cfdi.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row w-100"></div>
+<div class="au_container">
+  <div class="au_header">
+    <div>
+      <h3 class="au_title verde_t">REGISTRO DE FACTURAS (CFDI)</h3>
+      <div class="au_subtitle">Listado de CFDI preexistentes + relación OS → Partida/Contrato</div>
+    </div>
+    <div class="au_actions">
+      <a class="au_btn" href="/cfdi/nuevo">+ Alta CFDI</a>
+    </div>
+  </div>
+
+  <div class="au_toolbar">
+    <input id="au_q" class="au_input" placeholder="Buscar por UUID / RFC emisor / Razón social">
+    <button id="au_btnBuscar" class="au_btn au_btn_secondary">Buscar</button>
+  </div>
+
+  <div class="au_tablewrap">
+    <table class="au_table" id="au_tbl">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>UUID</th>
+          <th>RFC emisor</th>
+          <th>Proveedor</th>
+          <th>Contrato</th>
+          <th>Tipo de contrato</th>
+          <th>Partida</th>
+          <th>Estatus Reporte</th>
+          <th>Estatus CFDI</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="au_tbody"></tbody>
+    </table>
+    <div id="au_empty" class="au_muted" style="display:none;">No hay resultados.</div>
+  </div>
+</div>
+
+<!-- Modal Detalle -->
+<div id="au_modalBg" class="au_modal_bg" style="display:none;">
+  <div class="au_modal">
+    <div class="au_modal_head">
+      <div>
+        <div class="au_modal_title" id="au_modalTitle">Detalle CFDI</div>
+        <div class="au_muted au_mono" id="au_modalSubtitle">UUID: ...</div>
+      </div>
+      <button class="au_btn au_btn_secondary" id="au_btnCloseModal">Cerrar</button>
+    </div>
+    <div class="au_divider"></div>
+    <div class="au_modal_body" id="au_modalBody">
+      <!-- El contenido se genera dinámicamente -->
+    </div>
+  </div>
+</div>
+
+<!-- Modal Edición -->
+<div id="au_editBg" class="au_modal_bg" style="display:none;">
+  <div class="au_modal">
+    <div class="au_modal_head">
+      <div>
+        <div class="au_modal_title">Editar CFDI</div>
+        <div class="au_muted">UUID/RFC/cambio Contrato→Partida</div>
+      </div>
+      <button class="au_btn au_btn_secondary" id="au_btnCloseEdit">Cerrar</button>
+    </div>
+    <div class="au_divider"></div>
+
+    <form id="au_editForm" class="au_form">
+      <input type="hidden" id="au_edit_cfdi_id">
+
+      <div class="au_grid">
+        <div>
+          <label class="au_label">UUID:</label>
+          <input class="au_input" id="au_edit_uuid" readonly>
+        </div>
+        <div>
+          <label class="au_label">RFC emisor:</label>
+          <input class="au_input" id="au_edit_rfc" readonly>
+        </div>
+        <div>
+          <label class="au_label">Contrato:</label>
+          <select class="au_input" id="au_edit_contrato"></select>
+        </div>
+        <div>
+          <label class="au_label">Partida:</label>
+          <select class="au_input" id="au_edit_partida"></select>
+        </div>
+        <div>
+          <label class="au_label">Estatus CFDI:</label>
+          <select class="au_input" id="au_edit_estatus">
+            <option value="ACTIVO">ACTIVO</option>
+            <option value="CANCELADO">CANCELADO</option>
+            <option value="INACTIVO">INACTIVO</option>
+          </select>
+        </div>
+        <div>
+          <label class="au_label">Estatus Administrativo:</label>
+          <select class="au_input" id="au_edit_os_estatus" ></select>
+        </div>
+        <div>
+          <label class="au_label">Fecha emisión:</label>
+          <input class="au_input" id="au_edit_femi" type="date" required>
+        </div>
+        <div>
+          <label class="au_label">Fecha recepción:</label>
+          <input class="au_input" id="au_edit_frec" type="date" required>
+        </div>
+        <div>
+          <label class="au_label">Fecha pago:</label>
+          <input class="au_input" id="au_edit_fecha_pago" type="date">
+        </div>
+        <div>
+          <label class="au_label">Tipo de contrato:</label>
+          <select class="au_input" id="au_tipo_contrato">
+            <option value="FONDO ROTATORIO">FONDO ROTATORIO</option>
+            <option value="VIATICOS">VIATICOS</option>
+            <option value="CONTRATO">CONTRATO</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:10px;">
+        <label class="au_label">Observaciones adicionales:</label>
+        <textarea class="au_input" id="au_edit_obs_os" rows="2"></textarea>
+      </div>
+      <div class="au_form_actions">
+        <button class="au_btn" type="submit">Guardar cambios</button>
+      </div>
+
+      <div id="au_editMsg" class="au_muted"></div>
+    </form>
+  </div>
+</div>
+
+<script src="{{ url_for('static', path='js/cfdi.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,215 @@
+.fx-header { 
+    display:flex; 
+    justify-content:space-between; 
+    align-items:center; 
+    gap:12px; }
+.fx-title { margin:0; }
+.fx-sub { color:#a9b7e6; font-size:13px; }
+.fx-badge { display:inline-block; padding:4px 10px; border-radius:999px; font-size:12px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.08); }
+.fx-divider { height:1px; background: rgba(255,255,255,.10); margin:12px 0; }
+
+.fx-grid { 
+    display:flex; 
+    gap:16px; 
+    align-items:flex-start; 
+    margin-left: 20px;
+    margin-right: 20px;
+}
+.fx-col-4 { flex: 0 0 33.333%; }
+.fx-col-8 { flex: 0 0 66.666%; }
+
+.fx-panel { 
+    background:#fff; 
+    border:1px solid #223055; 
+    margin-bottom:10px;
+    width: 97%;
+    border-radius: 20px;
+    box-shadow: 0 0 5px black;
+}
+
+.accordion-header{
+    border-top-right-radius: 20px;
+    border-top-LEFT-radius: 20px;
+}
+.sec-icon{
+    border-top-LEFT-radius: 20px;
+}
+
+.fx-panel h3 { 
+    font-size: 13px;
+    font-weight: 700;
+    color: #4d4d4d;
+    height: 40px;
+    padding: 7px 35px 0 70px;
+}
+.fx-muted { 
+    color:#191919;
+    padding: 20px; 
+    font-size:12px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.fx-search { 
+    display:flex; 
+    gap:8px; 
+    margin:5px; 
+}
+.fx-search input { 
+    flex:1; 
+    padding:10px 12px; 
+    border-radius:10px; 
+    border:2px solid #191919; 
+    background:#fff; 
+    color:#191919; 
+}
+
+.fx-list { 
+    display:flex; 
+    flex-direction:column; 
+    gap:5px;
+    margin: 5px
+}
+.fx-item { 
+    border-bottom:1.5px solid #ccc; 
+    background:#fff; 
+    padding:5px; 
+    display:flex; 
+    justify-content:space-between; 
+    gap:5px; }
+.fx-item .meta { flex:1; }
+.fx-item .title {
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1.2;
+}
+.fx-item .sub { 
+    margin:4px 0 0; 
+    color:#191919; 
+    font-size:12px; 
+}
+
+.fx-btn { 
+    border:none; 
+    background:#fff; 
+    color:#026757; 
+    font-weight:800; 
+    cursor:pointer; 
+    border-radius:12px; 
+}
+.fx-btn-sm { 
+    padding:8px 10px; 
+    width:auto; 
+}
+.fx-btn:disabled { 
+    opacity:.5; 
+    cursor:not-allowed; 
+}
+.fx-btn-secondary { 
+    background: rgba(255,255,255,.12); 
+    color:#026757; 
+    border:1px solid rgba(255,255,255,.18); 
+}
+
+.fx-split { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+
+.fx-kv { 
+    padding: 10px;
+    display:grid; 
+    grid-template-columns: 160px 1fr 160px 1fr; 
+    gap:8px 12px; 
+    font-size:13px; 
+}
+.fx-kv .k { 
+    color:#191919;
+    font-weight: bold; 
+}
+
+.fx-kv .v { 
+    color:#191919; 
+}
+
+
+.fx-upload { margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.fx-upload input { flex:1; min-width: 220px; }
+
+/* Modal */
+.fx-modal-backdrop{
+  position:fixed; inset:0; background: rgba(0,0,0,.55);
+  display:flex; align-items:center; justify-content:center; padding:18px; z-index:9999;
+}
+.fx-modal{
+  background:#fff; 
+  border:1px solid #ccc; 
+  border-radius: 20px;
+  box-shadow: 0 0 5px black;
+  width: min(980px, 96vw);
+  max-height: 90vh;
+  overflow:auto;
+  padding:16px;
+  padding-top: 0px;
+}
+.fx-modal-head{ 
+    display:flex; 
+    justify-content:space-between; 
+    align-items:center; 
+    gap:12px; 
+    padding: 30px 10px 10px 10px;
+    border-radius: 10px;
+    background: #EEEEEC;
+}
+.validationMsg{ 
+    font-size:16px; 
+    color: #191919;
+}
+.validationMsg li, .validationMsg div, .validationMsg details{
+    list-style-type: none;
+    text-align: left;
+
+}
+.fx-modal-title{ 
+    font-weight:900; 
+    font-size:16px; 
+    color:#026757
+}
+
+.fx-form{ 
+    display:flex; 
+    flex-direction:column; 
+    gap:12px; 
+}
+
+.fx-form-grid{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap:10px;
+}
+
+.fx-form label{ 
+    display:block; 
+    margin:0 0 6px; 
+    font-size:12px; 
+    color:#026757; 
+    font-weight: bold;
+}
+
+.fx-form input, .fx-form select, .fx-form textarea{
+  width:100%;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid #191919;
+  background:#fff;
+  color:#191919;
+}
+.fx-form-actions{ 
+    display:flex; 
+    gap:10px; 
+    justify-content:flex-end; 
+    flex-wrap:wrap; 
+}
+@media (max-width: 900px){
+  .fx-form-grid{ 
+    grid-template-columns: repeat(1, minmax(0, 1fr)); 
+    }
+}
+

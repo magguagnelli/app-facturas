@@ -1,0 +1,91 @@
+<!-- templates/facturas_listado.html -->
+{% extends "base.html" %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/auditoria.css') }}">
+
+{% endblock %}
+
+{% block content %}
+<div class="titSecciones left">
+    <h2>Inicio: Reporte de CFDIs</h2>
+</div>
+<div class="row w-100"></div>
+<div class="au-container" style="max-width: 1400px; margin: 20px auto;">
+    <!-- Filtros -->
+    <div class="au-head">
+        <div class="au_actions">
+            <button id="flClean" class="fl_btn fl_btn_secondary" >Limpiar</button>
+            <button id="flSeekF" class="fl_btn fl_btn_primary">🔍 Buscar</button>
+            <button id="flExport" class="fl_btn fl_btn_success">📥 Exportar Excel</button>
+        </div>
+    </div>
+    <div class="au-filters">
+            <div>
+                <label>Proveedor (RFC o Razón Social)</label>
+                <input type="text" id="fl_filter_proveedor" placeholder="Buscar...">
+            </div>
+            <div>
+                <label>UUID</label>
+                <input type="text" id="fl_filter_uuid" placeholder="UUID...">
+            </div>
+            <div>
+                <label>Fecha Inicio</label>
+                <input type="date" id="fl_filter_fecha_inicio">
+            </div>
+            <div>
+                <label>Fecha Fin</label>
+                <input type="date" id="fl_filter_fecha_fin">
+            </div>
+            <div>
+                <label>Registros por página</label>
+                <select id="fl_per_page">
+                    <option value="25">25</option>
+                    <option value="50" selected>50</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                </select>
+            </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="au_table_wrap">
+        <div id="fl_loading" class="muted" style="display: none;">
+            Cargando datos...
+        </div>
+        
+        <div id="fl_empty" class="muted" style="display: none;">
+            No se encontraron facturas con los filtros aplicados.
+        </div>
+        
+        <table class="fl_table" id="fl_table" style="display: none;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>UUID</th>
+                    <th>Proveedor</th>
+                    <th>Área</th>
+                    <th>Contrato</th>
+                    <th>Partida</th>
+                    <th>Monto Total</th>
+                    <th>Fecha Recepción</th>
+                    <th>Estatus</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="fl_tbody">
+            </tbody>
+        </table>
+        
+        <div class="fl_pagination" id="fl_pagination" style="display: none;">
+            <div class="fl_pagination_info" id="fl_pagination_info"></div>
+            <div class="fl_pagination_controls" id="fl_pagination_controls"></div>
+        </div>
+    </div>
+</div>
+<script src="/static/js/facturas_listado.js"></script>
+{% endblock %}
+
+

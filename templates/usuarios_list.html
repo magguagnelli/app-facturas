@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Gestión de usuarios{% endblock %}
+
+{% block content %}
+<div class="titSecciones left">
+  <h3>GESTIÓN DE USUARIOS</h3>
+</div>
+<div class="row w-100">
+</div>
+<div class="bodyForm col-3 table-responsive">
+  <form method="get" action="/usuarios" style="margin: 12px 0; display:flex; gap:10px;">
+    <input name="q" type="text" placeholder="Buscar por correo o nombre" value="{{ q }}" style="flex:1;" class="form-control form-basic">
+    <button class="btnReg verde_t" type="submit" style="width:auto; padding:10px 14px;">Buscar</button>
+    <a class="btnReg verde_t" href="/usuarios" style="width:auto; padding:10px 14px; text-decoration:none; display:inline-block; text-align:center;">Limpiar</a>
+  </form>
+
+  <div style="margin: 10px 0;">
+    <a class="btnReg verde_t" href="/usuarios/nuevo" style="display:inline-block; width:auto; padding:10px 14px; text-decoration:none;">
+      + Nuevo usuario
+    </a>
+  </div>
+
+  <div style="overflow:auto; margin-top: 10px;">
+    <table class="table table-responsive">
+      <thead>
+        <tr style="text-align:left; border-bottom: 1px solid rgba(255,255,255,.15);">
+          <th class="table-head" style="padding:10px;">ID</th>
+          <th class="table-head" style="padding:10px;">Correo</th>
+          <th class="table-head" style="padding:10px;">Nombre</th>
+          <th class="table-head" style="padding:10px;">Rol</th>
+          <th class="table-head" style="padding:10px;">Estatus</th>
+          <th class="table-head" style="padding:10px;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+          <tr style="border-bottom: 1px solid rgba(255,255,255,.08);">
+            <td class="table-general" style="padding:10px;">{{ u.id }}</td>
+            <td class="table-general" style="padding:10px;">{{ u.correo }}</td>
+            <td class="table-general" style="padding:10px;">{{ u.nombre }}</td>
+            <td class="table-general" style="padding:10px;">{{ u.rol }}</td>
+            <td class="table-general" style="padding:10px;">{{ u.estatus }}</td>
+            <td class="table-general" style="padding:10px; white-space:nowrap;">
+              <a class="btn" href="/usuarios/{{ u.id }}/editar" style="width:auto; padding:8px 10px; text-decoration:none; display:inline-block;">
+                Editar
+              </a>
+
+              <form method="post" action="/usuarios/{{ u.id }}/reset-password" style="display:inline; margin-left:6px;">
+                <button class="btn" type="submit" style="width:auto; padding:8px 10px;">
+                  Recuperar contraseña
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+
+        {% if users|length == 0 %}
+          <tr>
+            <td colspan="6" style="padding:12px; color:#a9b7e6;">No hay usuarios que coincidan.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

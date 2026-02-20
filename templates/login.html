@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Sistema de Facturas{% endblock %}
+
+{% block content %}
+  <div class="titSecciones left">
+    <h3>INICIO DE SESIÓN</h3>
+  </div>
+  <div class="row w-100">
+    <p class="verde_t">Acceso sólo con correo <b>@imssbienestar.gob.mx</p>
+  </div>
+  <div class="boxLogin">
+    <div class="headerBox">
+      <img src="{{ url_for('static', path='img/PLECA_LOGO.png') }}">
+    </div>
+    <div class="bodyBox">
+      <form id="form_log" class="row" action="/login" method="post">
+        <div class="col-12 ma-g">
+            <label class="titForm verde_t">
+              <img src="{{ url_for('static', path='img/USUARIO.svg') }}"/>
+              *Correo
+            </label>
+            <input type="email" id="correo" name="correo" class="form-control form-login oro_t"/>
+        </div>
+        <div class="col-12 ma-g">
+          <label class="titForm verde_t">
+            <img src="{{ url_for('static', path='img/CONTRASENA.svg') }}" />
+            *Contraseña
+          </label>
+          <input type="password" id="password" name="password" class="form-control form-login oro_t" />
+        </div>
+        <div class="col-12 t-c center">
+          <button class="btnGral verde_t center" type="submit">
+            <p>INGRESAR</p>
+            <div class="btnIcon">
+              <div class="boxIcon verde">
+                <img src="{{ url_for('static', path='img/CONTINUAR.svg') }}">
+              </div>
+              <span class="s-verde"></span>
+            </div> 
+          </button>
+        </div>
+        {% if error %}
+        <div class="col-12 ma-g">
+          <div class="error">{{ error }}</div>
+        </div>
+        {% endif %}
+      </form>
+    </div>
+{% endblock %}

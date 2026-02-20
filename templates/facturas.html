@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Facturas/CFDI{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/facturas.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="titSecciones left">
+    <h3>GESTIÓN DE FACTURAS</h3>
+  </div>
+  <div class="row w-100">
+    <p class="verde_t"><b>Contrato → Partida → Orden de suministro → CFDI</b></p>
+    <br>
+  </div>
+</div>
+<div class="row w-20"> </div>
+<div class="fx-divider"></div>
+
+<div class="fx-grid">
+  <!-- LEFT col-4 -->
+  <div class="fx-col-4">
+    <section class="fx-panel">
+      <div class="accordion-header">
+        <div class="sec-icon verde">
+          <span class="s-verde"></span>
+        </div>
+        <h3>Contratos</h3>
+      </div>
+      <div class="fx-search">
+        <input id="qContratos" placeholder="Buscar contrato / RFC / proveedor">
+        <button id="btnBuscarContratos" class="fx-btn fx-btn-sm">
+          <i class="fa fa-search" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div id="contractsList" class="fx-list"></div>
+      <div id="contractsEmpty" class="fx-muted" style="display:none;">No hay contratos.</div>
+    </section>
+
+    <section class="fx-panel">
+      <div class="accordion-header">
+        <div class="sec-icon verde">
+          <span class="s-verde"></span>
+        </div>
+        <h3>Partidas</h3>
+      </div>
+      <div id="partidasHint" class="fx-muted">Selecciona un contrato.</div>
+      <div id="partidasList" class="fx-list"></div>
+      <div id="partidasEmpty" class="fx-muted" style="display:none;">No hay partidas, Contacte a su Administrador.</div>
+    </section>
+
+    <section class="fx-panel">
+      <div class="fx-split">
+        <div class="accordion-header">
+          <div class="sec-icon verde">
+            <span class="s-verde"></span>
+          </div>
+          <h3>Órdenes de suministro <span class="fx-badge" id="selPath">Sin selección</span></h3>
+        </div>        
+      </div>
+      <button id="btnNewOS" class="fx-btn fx-btn-sm" disabled>
+          <i class="fa fa-plus" aria-hidden="true"></i>Nuevo Registro
+      </button>
+      <div id="osHint" class="fx-muted">Selecciona una partida.</div>
+      <div id="osList" class="fx-list"></div>
+      <div id="osEmpty" class="fx-muted" style="display:none;">No hay Órdenes de Suministro.</div>
+    </section>
+  </div>
+
+  <!-- RIGHT col-8 -->
+  <div class="fx-col-8">
+<!--1 Contrato-->
+    <section class="fx-panel">
+      <div class="accordion-header">
+        <div class="sec-icon verde">
+          <span class="s-verde"></span>
+        </div>
+        <h3>1. Detalle del contrato</h3>
+      </div> 
+      <div id="contratoPlaceholder" class="fx-muted" style="display:block">
+        <p>Selecciona “Ver detalle” en un contrato.</p>
+      </div>
+      <div id="contratoKV" class="fx-kv" style="display:none;"></div>
+    </section>
+<!--2.Partida-->
+    <section class="fx-panel">
+      <div class="accordion-header">
+        <div class="sec-icon verde">
+          <span class="s-verde"></span>
+        </div>
+        <h3>2. Detalle de Partida</h3>
+      </div> 
+      <div id="partidaPlaceholder" class="fx-muted">Selecciona “Ver detalle” en una partida.</div>
+      <div id="partidaKV" class="fx-kv" style="display:none;"></div>
+    </section>
+<!--3.OS-->
+    <section class="fx-panel">
+      <div class="accordion-header">
+        <div class="sec-icon verde">
+          <span class="s-verde"></span>
+        </div>
+        <h3>3. Detalle de Orden de Suministro</h3>
+      </div> 
+      <div id="osPlaceholder" class="fx-muted">Selecciona “Ver detalle” en una orden de suministro.</div>
+      <div id="osKV" class="fx-kv" style="display:none;"></div>
+    </section>
+<!-- Sección 4: CFDI -->
+    <section class="fx-panel">
+      <div class="fx-split">
+        <div class="accordion-header">
+          <div class="sec-icon verde">
+            <span class="s-verde"></span>
+          </div>
+          <h3>4. Detalle de CFDI</h3>
+        </div> 
+      </div>
+       <button id="btnOpenCFDIModal" class="fx-btn fx-btn-sm" disabled>
+        <i class="fa fa-plus" aria-hidden="true"></i> Cargar CFDI
+      </button>
+      <div id="cfdiPlaceholder" class="fx-muted">Selecciona una Orden de Suministro para ver/capturar el/los CFDI.</div>
+      <div id="cfdiKV" class="fx-list"></div>
+      <div id="cfdiEmpty" class="fx-muted" style="display:none;">No hay CFDIs para esta Orden de Suministro.</div>
+    </section>
+  </div>
+</div>
+
+<!-- Modal OS -->
+<div id="osModalBackdrop" class="fx-modal-backdrop" style="display:none;">
+  <div class="fx-modal">
+    <div class="fx-modal-head">
+      <div>
+        <div class="fx-modal-title" id="osModalTitle">Orden de Suministro</div>
+        <div class="fx-muted" id="osModalSubtitle">Captura / Edición</div>
+      </div>
+      <button class="fx-btn fx-btn-sm fx-btn-secondary" id="btnCloseOSModal">
+        <i class="fa fa-times" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="fx-divider"></div>
+
+    <form id="osForm" class="fx-form">
+      <input type="hidden" id="os_id" />
+
+      <div class="fx-form-grid">
+        <div>
+          <label>Partida (id)</label>
+          <input id="os_partida" type="number" required />
+        </div>
+
+        <div>
+          <label>Proveedor</label>
+          <select id="os_proveedor" required></select>
+        </div>
+
+        <div>
+          <label>Fecha orden</label>
+          <input id="os_fecha_orden" type="date" required />
+        </div>
+
+        <div>
+          <label>Folio oficio</label>
+          <input id="os_folio_oficio" maxlength="20" required />
+        </div>
+
+        <div>
+          <label>Fecha factura</label>
+          <input id="os_fecha_factura" type="date" required />
+        </div>
+
+        <div>
+          <label>Folio interno</label>
+          <input id="os_folio_interno" maxlength="20" required />
+        </div>
+
+        <div>
+          <label>Cuenta bancaria</label>
+          <input id="os_cuenta_bancaria" maxlength="30" required />
+        </div>
+
+        <div>
+          <label>Banco</label>
+          <input id="os_banco" maxlength="20" required />
+        </div>
+
+        <div>
+          <label>Mes servicio</label>
+          <input id="os_mes_servicio" maxlength="10" required />
+        </div>
+
+        <div>
+          <label>Monto sin IVA</label>
+          <input id="os_monto_siniva" type="number" step="0.01" required />
+        </div>
+
+        <div>
+          <label>IVA</label>
+          <input id="os_iva" type="number" step="0.01" required />
+        </div>
+
+        <div>
+          <label>Monto c/ IVA</label>
+          <input id="os_monto_c_iva" type="number" step="0.01" required />
+        </div>
+
+        <div>
+          <label>ISR</label>
+          <input id="os_isr" type="number" step="0.01" required value="0" />
+        </div>
+
+        <div>
+          <label>IEPS</label>
+          <input id="os_ieps" type="number" step="0.01" required value="0" />
+        </div>
+
+        <div>
+          <label>Descuento</label>
+          <input id="os_descuento" type="number" step="0.01" required value="0" />
+        </div>
+
+        <div>
+          <label>Otras contribuciones</label>
+          <input id="os_otras_contribuciones" type="number" step="0.01" required value="0" />
+        </div>
+
+        <div>
+          <label>Retenciones</label>
+          <input id="os_retenciones" type="number" step="0.01" required value="0" />
+        </div>
+
+        <div>
+          <label>Penalización</label>
+          <input id="os_penalizacion" type="number" step="0.01" required value="0" />
+        </div>
+
+        <div>
+          <label>Deductiva</label>
+          <input id="os_deductiva" type="number" step="0.01" required value="0" />
+        </div>
+
+        <div>
+          <label>Importe pago</label>
+          <input id="os_importe_pago" type="number" step="0.01" required />
+        </div>
+
+        <div>
+          <label>Importe p/ compromiso</label>
+          <input id="os_importe_p_compromiso" type="number" step="0.01" required />
+        </div>
+
+        <div>
+          <label>No. compromiso</label>
+          <input id="os_no_compromiso" type="number" required />
+        </div>
+
+        <div>
+          <label>Estatus (id estado_orden)</label>
+          <input id="os_estatus" type="number" required value="1" />
+        </div>
+
+        <div>
+          <label>Fecha pago</label>
+          <input id="os_fecha_pago" type="date" />
+        </div>
+      </div>
+
+      <div>
+        <label>Observaciones</label>
+        <textarea id="os_observaciones" maxlength="255" rows="3"></textarea>
+      </div>
+
+      <div class="fx-form-actions">
+        <button type="button" class="fx-btn fx-btn-sm fx-btn-secondary" id="btnCalcIVA">Calcular Monto c/IVA</button>
+        <button type="submit" class="fx-btn fx-btn-sm" id="btnSaveOS">Guardar</button>
+      </div>
+
+      <div class="fx-muted" id="osFormMsg"></div>
+    </form>
+  </div>
+</div>
+<!--Fin Modal OS-->
+<!-- Modal CFDI -->
+<div id="cfdiModalBg" class="fx-modal-backdrop" style="display:none;">
+  <div class="fx-modal">
+    <div class="fx-modal-head">
+      <div>
+        <div class="fx-modal-title" id="cfdiModalTitle">Cargar CFDI</div>
+      </div>
+      <button class="fx-btn fx-btn-sm fx-btn-secondary" id="btnCloseCFDIModal">Cerrar</button>
+    </div>
+
+    <div class="fx-divider"></div>
+
+    <!-- Upload -->
+    <div id="cfdiUploadBox">
+      <div class="fx-muted" id="cfdiModalMsg">—</div>
+      <div class="fx-muted">Sube XML. Se extrae UUID/RFC/fechas automáticamente.</div>
+      <div class=" fx-form fx-upload fx-form-grid" style="margin-top:10px;">
+        <input id="cfdiFile" type="file" accept=".xml" />
+        <input id="cfdiObs" type="text" placeholder="Observaciones (opcional)" maxlength="255" />
+        <button id="btnUploadCFDI" class="fx-btn fx-btn-sm">Guardar</button>
+      </div>
+    </div>
+
+    <div class="fx-divider"></div>
+
+    <!-- Edit meta -->
+    <div id="cfdiEditBox" style="display:none;">
+      <div class="fx-muted">Editar CFDI seleccionado</div>
+
+      <input type="hidden" id="cfdiEditId" />
+
+      <div class="fx-form-grid" style="margin-top:10px;">
+        <div>
+          <label>Fecha recepción</label>
+          <input id="cfdiFechaRecep" type="date" required>
+        </div>
+        <div>
+          <label>Fecha emisión</label>
+          <input id="cfdiFechaEmi" type="date" required>
+        </div>
+        <div class="span2">
+          <label>Observaciones</label>
+          <input id="cfdiEditObs" maxlength="255">
+        </div>
+      </div>
+
+      <div class="fx-form-actions" style="margin-top:10px;">
+        <button id="btnSaveCFDIEdit" class="fx-btn fx-btn-sm">Guardar cambios</button>
+        <button id="btnDeleteCFDI" class="fx-btn fx-btn-sm fx-btn-secondary">Eliminar</button>
+      </div>
+
+      <div class="fx-muted" style="margin-top:10px;">Opcional: reemplazar XML</div>
+      <div class="fx-upload">
+        <input id="cfdiReplaceFile" type="file" accept=".xml">
+        <button id="btnReplaceXML" class="fx-btn fx-btn-sm">Reemplazar XML</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!--fin modal CFDI-->
+
+<script src="{{ url_for('static', path='js/facturas.js') }}"></script>
+{% endblock %}
