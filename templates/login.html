@@ -11,20 +11,20 @@
   </div>
   <div class="boxLogin">
     <div class="headerBox">
-      <img src="{{ url_for('static', path='img/PLECA_LOGO.png') }}">
+      <img src="/static/img/PLECA_LOGO.png">
     </div>
     <div class="bodyBox">
       <form id="form_log" class="row" action="/login" method="post">
         <div class="col-12 ma-g">
             <label class="titForm verde_t">
-              <img src="{{ url_for('static', path='img/USUARIO.svg') }}"/>
+              <img src="/static/img/USUARIO.svg"/>
               *Correo
             </label>
             <input type="email" id="correo" name="correo" class="form-control form-login oro_t"/>
         </div>
         <div class="col-12 ma-g">
           <label class="titForm verde_t">
-            <img src="{{ url_for('static', path='img/CONTRASENA.svg') }}" />
+            <img src="/static/img/CONTRASENA.svg" />
             *Contraseña
           </label>
           <input type="password" id="password" name="password" class="form-control form-login oro_t" />
@@ -34,7 +34,7 @@
             <p>INGRESAR</p>
             <div class="btnIcon">
               <div class="boxIcon verde">
-                <img src="{{ url_for('static', path='img/CONTINUAR.svg') }}">
+                <img src="/static/img/CONTINUAR.svg">
               </div>
               <span class="s-verde"></span>
             </div> 

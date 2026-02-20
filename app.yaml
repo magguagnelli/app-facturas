@@ -12,25 +12,25 @@ automatic_scaling:
 resources:
   secret_bd:
     type: secret
-    scope: facturasapp
+    scope: facturas_sec
     key: DB_DSN
     permission: CAN_READ
  
   secret_cfdi:
     type: secret
-    scope: facturasapp
+    scope: facturas_sec
     key: CFDI_XSD_PATH
     permission: CAN_READ
  
   secret_debug:
     type: secret
-    scope: facturasapp
+    scope: facturas_sec
     key: DEBUG
     permission: CAN_READ
  
   secret_key:
     type: secret
-    scope: facturasapp
+    scope: facturas_sec
     key: SECRET_KEY
     permission: CAN_READ
  
