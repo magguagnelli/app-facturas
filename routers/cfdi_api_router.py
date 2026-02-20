@@ -21,6 +21,8 @@ from services.cfdi_service import (
     update_factura_and_os,
     #delete_factura,
     set_cfdi_estatus,
+    list_est_siaf,
+    list_fiscalizador,
 )
 
 router = APIRouter(prefix="/api/cfdi", tags=["cfdi_api"])
@@ -53,6 +55,16 @@ def api_contratos(request: Request):
 def api_partidas(request: Request, contrato_id: int):
     _require_user(request)
     return {"items": list_partidas_by_contrato(contrato_id)}
+
+@router.get("/catalogos/estado_siaf")
+def api_estado_siaf(request: Request):
+    _require_user(request)
+    return {"items": list_est_siaf()}
+
+@router.get("/catalogos/fiscalizador")
+def api_fiscalizador(request: Request):
+    _require_user(request)
+    return {"items": list_fiscalizador()}
 
 @router.post("/validar")
 async def api_validar(request: Request, file: UploadFile = File(...)):
@@ -119,6 +131,23 @@ async def api_alta(
     oficio_dev: Optional[str] = Form(None),
     fecha_dev: Optional[str] = Form(None),
     motivo_dev: Optional[str] = Form(None),
+
+    #ultimos
+    ret_imp_nom: Optional[float] = Form(0),
+    fecha_pr: Optional[str] = Form(None),
+    inmueble: Optional[str] = Form(None),
+    periodo: Optional[str] = Form(None),
+    recargos: Optional[str] = Form(None),
+    corte_presupuesto: Optional[str] = Form(None),
+    fecha_turno: Optional[str] = Form(None),
+    obs_pr: Optional[str] = Form(None),
+    numero_solicitud25: Optional[str] = Form(None),
+    clc25: Optional[str] = Form(None),
+    numero_solicitud26: Optional[str] = Form(None),
+    clc26: Optional[str] = Form(None),
+    numero_solicitud27: Optional[str] = Form(None),
+    clc27: Optional[str] = Form(None),
+    capturista: Optional[str] = Form(None),
 ):    
     
     user = _require_user(request)
@@ -188,6 +217,23 @@ async def api_alta(
         oficio_dev=oficio_dev,
         fecha_dev=fecha_dev,
         motivo_dev=motivo_dev,
+
+        #final
+        ret_imp_nom=ret_imp_nom,
+        fecha_pr=fecha_pr,
+        inmueble=inmueble,
+        periodo=periodo,
+        recargos=recargos,
+        corte_presupuesto=corte_presupuesto,
+        fecha_turno=fecha_turno,
+        obs_pr=obs_pr,
+        numero_solicitud25=numero_solicitud25,
+        clc25=clc25,
+        numero_solicitud26=numero_solicitud26,
+        clc26=clc26,
+        numero_solicitud27=numero_solicitud27,
+        clc27=clc27,
+        capturista=capturista,
     )
     #return JSONResponse({"ok": False, "message": res, "validation": v}, status_code=200)
     

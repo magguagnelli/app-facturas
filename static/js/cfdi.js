@@ -548,7 +548,7 @@ async function au_submitAlta(e) {
   fd.append("ieps", au_qs("au_ieps").value);
   fd.append("descuento", au_qs("au_descuento").value);
   fd.append("otras_contribuciones", au_qs("au_otras").value);
-  fd.append("retenciones", au_qs("au_retenciones").value);
+  fd.append("retenciones", au_qs("au_retenciones").value);au_ret_imp_nom
   fd.append("penalizacion", au_qs("au_penalizacion").value);
   fd.append("deductiva", au_qs("au_deductiva").value);
   fd.append("importe_pago", au_qs("au_importe_pago").value);
@@ -572,22 +572,40 @@ async function au_submitAlta(e) {
   fd.append("riva", au_qs("au_riva").value);
   fd.append("solicitud", au_qs("au_solicitud").value);
   fd.append("observaciones_os", au_qs("au_obs_os").value.trim());
- 
-  //Facturacion
+
+   //Facturacion
   fd.append("fecha_fiscalizacion", au_qs("au_fecha_fiscalizacion").value);  
   fd.append("fiscalizador", au_qs("au_fiscalizador").value);  
   fd.append("responsable_fis", au_qs("au_responsable_fis").value);  
   fd.append("fecha_carga_sicop", au_qs("au_fecha_carga_sicop").value);
   fd.append("responsable_carga_sicop", au_qs("au_responsable_carga_sicop").value);
-  fd.append("numero_solicitud", au_qs("au_numero_solicitud_pago").value);  
-  fd.append("clc", au_qs("au_clc").value);  
   fd.append("estatus_siaf", au_qs("au_estatus_siaf").value);  
- 
+  fd.append("numero_solicitud", au_qs("au_numero_solicitud_pago").value);  
+  fd.append("clc", au_qs("au_clc").value);
+
   //Devolucion
   fd.append("oficio_dev", au_qs("au_oficio_dev").value);  
   fd.append("fecha_dev", au_qs("au_fecha_dev").value);  
   fd.append("motivo_dev", au_qs("au_motivo_dev").value);  
  
+  //finals
+  fd.append("ret_imp_nom", au_qs("au_ret_imp_nom").value);
+  fd.append("fecha_pr", au_qs("au_fecha_pr").value);
+  fd.append("inmueble", au_qs("au_inmueble").value);
+  fd.append("periodo", au_qs("au_periodo").value);
+  fd.append("recargos", au_qs("au_recargos").value);
+  fd.append("corte_presupuesto", au_qs("au_corte_presupuesto").value);
+  fd.append("fecha_turno", au_qs("au_fecha_turno").value);
+  fd.append("obs_pr", au_qs("au_obs_pr").value);
+  fd.append("numero_solicitud25", au_qs("au_numero_solicitud_pago25").value);  
+  fd.append("clc25", au_qs("au_clc25").value);
+  fd.append("numero_solicitud26", au_qs("au_numero_solicitud_pago26").value);  
+  fd.append("clc26", au_qs("au_clc26").value);
+  fd.append("numero_solicitud27", au_qs("au_numero_solicitud_pago27").value);  
+  fd.append("clc27", au_qs("au_clc27").value);  
+  fd.append("capturista", au_qs("au_correo").value);  
+ 
+
   const msg = au_qs("au_altaMsg");
   msg.textContent = "Registrando...";
  

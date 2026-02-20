@@ -2,7 +2,7 @@
 {% block title %}Pistas de Auditoría{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', path='css/auditoria.css') }}">
+<link rel="stylesheet" href="/estatic/css/auditoria.css">
 {% endblock %}
 
 {% block content %}
@@ -87,5 +87,5 @@
 <div id="empty" class="muted" style="display:none; margin-top:10px;">
     No hay registros con esos filtros.
 </div>
-<script src="{{ url_for('static', path='js/auditoria.js') }}"></script>
+<script src="/static/auditoria.js"></script>
 {% endblock %}

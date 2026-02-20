@@ -136,6 +136,20 @@ def list_partidas_by_contrato(contrato_id: int) -> List[Dict[str, Any]]:
             #cols = [d[0] for d in cur.description]
             return [dict(r) for r in cur.fetchall()]
 
+def list_est_siaf() -> List[dict[str,Any]]:
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("select id, nombre as estado_siaf from cat_facturas.estatus_siaf order by 1")
+            items = [dict(r) for r in cur.fetchall()]
+            return items
+
+def list_fiscalizador() -> List[dict[str,Any]]:
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("select id, nombre as fiscalizador from cat_facturas.usuario where tipo = 'FISCALIZACION' order by 1")
+            items = [dict(r) for r in cur.fetchall()]
+            return items
+
 def validate_cfdi(xml_bytes: bytes) -> Dict[str, Any]:
     checklist = build_validation_checklist(xml_bytes)
 
@@ -236,6 +250,23 @@ def create_factura_and_os(
     oficio_dev: Optional[str] = None,
     fecha_dev: Optional[str] = None,
     motivo_dev: Optional[str] = None,
+
+    #final
+    ret_imp_nom: Optional[float] = 0,
+    fecha_pr: Optional[str] = None,
+    inmueble: Optional[str] = None,
+    periodo: Optional[str] = None,
+    recargos: Optional[str] = None,
+    corte_presupuesto: Optional[str] = None,
+    fecha_turno: Optional[str] = None,
+    obs_pr: Optional[str] = None,
+    numero_solicitud25: Optional[str] = None,
+    clc25: Optional[str] = None,
+    numero_solicitud26: Optional[str] = None,
+    clc26: Optional[str] = None,
+    numero_solicitud27: Optional[str] = None,
+    clc27: Optional[str] = None,
+    capturista: Optional[str] = None,
     
 ) -> Dict[str, Any]:
     # Extrae del XML ORIGINAL (incluye timbre)
@@ -274,7 +305,10 @@ def create_factura_and_os(
                 orden_suministro, validacion, _5millar, riva, risr, solicitud, observaciones, 
                 fecha_fiscalizacion, fiscalizador, fecha_carga_sicop, responsable_carga_sicop,
                 numero_solicitud_pago, clc, estatus_siaff, responsable_fis, 
-                oficio_dev, fecha_dev, motivo_dev)
+                oficio_dev, fecha_dev, motivo_dev,
+                clc25,clc26,clc27,numero_solicitud_pago25,numero_solicitud_pago26,numero_solicitud_pago27,
+                re_imp_nomina,fecha_pr,inmueble,periodo,recargos,observacion_pr,
+                corte_presupuesto,fecha_turno)
                 VALUES
                 (%s,%s,%s,%s,%s,%s,
                 %s,%s,%s,%s,%s,%s,%s,%s,
@@ -284,7 +318,10 @@ def create_factura_and_os(
                 %s,%s,%s,%s,%s,%s,%s,
                 %s,%s,%s,%s,
                 %s,%s,%s,%s,
-                %s,%s,%s)
+                %s,%s,%s,
+                %s,%s,%s,%s,%s,%s,
+                %s,%s,%s,%s,%s,%s,
+                %s,%s)
                 RETURNING id
             """, (
                 partida_id, proveedor_id, _to_date(fecha_solicitud), folio_oficio, fecha_emision, folio_interno,
@@ -295,7 +332,10 @@ def create_factura_and_os(
                 (orden_suministro or None), (validacion or None), (cincomillar or None), (riva or None), (risr or None), (solicitud or None), (observaciones_os or None),
                 _to_date(fecha_fiscalizacion), (fiscalizador or None), _to_date(fecha_carga_sicop), (responsable_carga_sicop or None),
                 (numero_solicitud or None), (clc or None),(estatus_siaf or None),(responsable_fis or None),
-                (oficio_dev or None),_to_date(fecha_dev), (motivo_dev or None)                 
+                (oficio_dev or None),_to_date(fecha_dev), (motivo_dev or None),
+                (clc25 or None),(clc26 or None),(clc27 or None),(numero_solicitud25 or None),(numero_solicitud26 or None),(numero_solicitud27 or None),
+                (ret_imp_nom or None),_to_date(fecha_pr),(inmueble or None),(periodo or None),(recargos or None),(obs_pr or None),
+                (corte_presupuesto or None),_to_date(fecha_turno)
             ))
             os_id = cur.fetchone()
             os_id = _get_id(os_id)
@@ -313,14 +353,15 @@ def create_factura_and_os(
             cur.execute("""
                 INSERT INTO cat_facturas.cfdi(
                 orden_suministro, uuid, rfc_emisor, fecha_recepcion, fecha_emision, 
-                onservaciones, xml_factura, monto_total,  estatus, fecha_captura, monto_partida)
+                onservaciones, xml_factura, monto_total,  estatus, fecha_captura, monto_partida,resp_captura)
                 VALUES(
                     %s,%s,%s,%s,%s,
-                    %s,%s,%s,%s,%s,%s)
+                    %s,%s,%s,%s,%s,%s,
+                    %s)
                 RETURNING id
             """, (
                 os_id, uuid, rfc_emisor, _to_date(fecha_recepcion), fecha_emision, 
-                (observaciones_cfdi or None), xml_str, importe_pago,"ACTIVO", _to_date(fecha_captura), monto_partida
+                (observaciones_cfdi or None), xml_str, importe_pago,"ACTIVO", _to_date(fecha_captura), monto_partida,actor_email
                 )
             )
             cfdi_id = _get_id(cur.fetchone())

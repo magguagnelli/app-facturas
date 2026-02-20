@@ -2,7 +2,7 @@
 {% block title %}Alta CFDI{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', path='css/cfdi.css') }}">
+<link rel="stylesheet" href="/static/css/cfdi.css">
 {% endblock %}
 
 {% block content %}
@@ -129,6 +129,11 @@
               <label class="au_label">Razón Social</label>
               <input class="au_input" id="au_razon" readonly>
             </div>
+            <div>
+              <label class="au_label">Capturista</label>
+              <input class="au_input" id="au_capturista" value="{{user_name}}" readonly>
+              <input class="au_input" id="au_correo" value="{{user_mail}}" type="hidden" readonly>
+            </div>
           </div>
         </div>
       <!--CFDI-->
@@ -164,6 +169,7 @@
             <div><label class="au_label">Descuento (MNX)</label><input class="au_input" id="au_descuento"  value="0" ></div>
             <div><label class="au_label">Otras contribuciones (MNX)</label><input class="au_input" id="au_otras"  value="0"></div>
             <div><label class="au_label">Retenciones (MNX)</label><input class="au_input" id="au_retenciones"  value="0" ></div>
+            <div><label class="au_label">Retención de Impuesto sobre Nómina (MNX)</label><input class="au_input" id="au_ret_imp_nom"  value="0" ></div>
             <div><label class="au_label">Penalización (MNX)</label><input class="au_input" id="au_penalizacion"  value="0" ></div>
             <div><label class="au_label">Deductiva (MNX)</label><input class="au_input" id="au_deductiva"  value="0" ></div>
             <div>
@@ -185,43 +191,60 @@
             <div><label class="au_label">Folio interno</label><input class="au_input" id="au_folio_interno" maxlength="20"></div>
             <div><label class="au_label">Cuenta bancaria</label><input class="au_input" id="au_cuenta_bancaria" maxlength="30"></div>
             <div><label class="au_label">Banco</label><input class="au_input" id="au_banco" maxlength="20" ></div>
-            
-            <div><label class="au_label">No. compromiso</label><input class="au_input" id="au_no_comp" type="number" ></div>
-            
+            <div><label class="au_label">No. compromiso</label><input class="au_input" id="au_no_comp" type="number" ></div>            
             <!--restantes-->
             <div><label class="au_label">Validación</label><input class="au_input" id="au_validacion"  ></div>
             <div><label class="au_label">5 millar</label><input class="au_input" id="au_5millar"  ></div>
             <div><label class="au_label">r iva</label><input class="au_input" id="au_riva"  ></div>
             <div><label class="au_label">r isr</label><input class="au_input" id="au_risr"  ></div>
             <div><label class="au_label">Solicitud</label><input class="au_input" id="au_solicitud"  ></div>
-            <div><input class="au_input" id="au_archivo" maxlength="100" type="hidden"></div>
+            <!--finales-->
+            <div><label class="au_label">Fecha Pago Referenciado</label><input class="au_input" id="au_fecha_pr" type="date" ></div>
+            <div><label class="au_label">Inmueble</label><input class="au_input" id="au_inmueble" ></div>
+            <div><label class="au_label">Periodo</label><input class="au_input" id="au_periodo" ></div>
+            <div><label class="au_label">Recargos</label><input class="au_input" id="au_recargos" ></div>
+            <div><label class="au_label">Corte Presupuesto</label><input class="au_input" id="au_corte_presupuesto" ></div>
+            <div><label class="au_label">Fecha de Turno</label><input class="au_input" id="au_fecha_turno" type="date"></div>
+          </div>
+          <div><input class="au_input" id="au_archivo" maxlength="100" type="hidden"></div>
+          <div style="margin-top:10px;">
+            <label class="au_label">Observaciones de Pago referenciado</label>
+            <textarea class="au_input" id="au_obs_pr" rows="2"></textarea>
           </div>
           <div style="margin-top:10px;">
-            <label class="au_label">Observaciones Adicionales</label>
+            <label class="au_label">Observaciones</label>
             <textarea class="au_input" id="au_obs_os" rows="2"></textarea>
           </div>
         </div>
         <div class="tab-pane fade" id="facturacion" role="tabpanel" aria-labelledby="facturacion-tab">
           <div class="au_grid">
             <div><label class="au_label">Fecha de Fiscalización</label><input class="au_input" id="au_fecha_fiscalizacion" type="date" ></div>
-            <div><label class="au_label">Fiscalizador</label><input class="au_input" id="au_fiscalizador" ></div>
+            <div>
+              <label class="au_label">Fiscalizador</label>
+              <select class="au_input" id="au_fiscalizador" >
+                {% for fisc in fiscalizadores["items"] %}
+                  <option value="{{ fisc['fiscalizador'] }}">{{ fisc["fiscalizador"] }}</option>
+                {% endfor %}
+              </select>
+            </div>
             <div><label class="au_label">Responsable DOC FIS</label><input class="au_input" id="au_responsable_fis"></div>
             <div><label class="au_label">Fecha de Carga en SICOP</label><input class="au_input" id="au_fecha_carga_sicop" type="date"></div>
             <div><label class="au_label">Responsable de carga en SICOP</label><input class="au_input" id="au_responsable_carga_sicop" ></div>
-            <div><label class="au_label">Número de Solicitud de Pago</label><input class="au_input" id="au_numero_solicitud_pago" ></div>
-            <div><label class="au_label">CLC</label><input class="au_input" id="au_clc" ></div>
             <div><label class="au_label">Estatus SIAF</label>
               <select class="au_input" id="au_estatus_siaf" name="au_estatus_siaf">
                     {% for siaf in estados_siaf["items"] %}
-                        <option value="{{ siaf['id'] }}"
-                            {% if data and siaf['id'] == data['item']['status_siaf'] %}
-                                selected
-                            {% endif %}>
-                            {{ siaf["estatus"] }}
-                        </option>
+                        <option value="{{ siaf['estado_siaf'] }}">{{ siaf["estado_siaf"] }}</option>
                     {% endfor %}
                 </select>
             </div>
+            <div><label class="au_label">CLC 2024</label><input class="au_input" id="au_clc" ></div>
+            <div><label class="au_label">Número de Solicitud de Pago 2024</label><input class="au_input" id="au_numero_solicitud_pago" ></div>
+            <div><label class="au_label">CLC 2025</label><input class="au_input" id="au_clc25" ></div>
+            <div><label class="au_label">Número de Solicitud de Pago 2025</label><input class="au_input" id="au_numero_solicitud_pago25" ></div>
+            <div><label class="au_label">CLC 2026</label><input class="au_input" id="au_clc26" ></div>
+            <div><label class="au_label">Número de Solicitud de Pago 2026</label><input class="au_input" id="au_numero_solicitud_pago26" ></div>
+            <div><label class="au_label">CLC 2027</label><input class="au_input" id="au_clc27" ></div>
+            <div><label class="au_label">Número de Solicitud de Pago 2027</label><input class="au_input" id="au_numero_solicitud_pago27" ></div>
             <div><label class="au_label">Fecha pago</label><input class="au_input" id="au_fecha_pago" type="date"></div>
           </div>
         </div>
@@ -237,5 +260,5 @@
   </div>
 </div>
 
-<script src="{{ url_for('static', path='js/cfdi.js') }}"></script>
+<script src="/static/js/cfdi.js"></script>
 {% endblock %}

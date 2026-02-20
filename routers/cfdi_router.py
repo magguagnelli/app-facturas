@@ -6,7 +6,7 @@ from fastapi.templating import Jinja2Templates
 from core.auth import require_login
 from core.audit import audit, build_log
 from typing import Optional
-from routers.cfdi_api_router import api_detalle, api_estado_orden
+from routers.cfdi_api_router import api_detalle, api_estado_orden, api_estado_siaf, api_fiscalizador
 
 router = APIRouter(tags=["cfdi_pages"])
 
@@ -46,30 +46,9 @@ def cfdi_alta_page(request: Request):
     
     if user.rol not in {"CAPTURISTA", "ADMIN"}:
         return RedirectResponse(url="/home", status_code=302)
-    estados_siaf = {
-        "items": [
-            {
-                "id": "Estatus 1",
-                "estatus": "Estatus 1"
-            },
-            {
-                "id": "Estatus 2",
-                "estatus": "Estatus 2"
-            },
-            {
-                "id": "Estatus 3",
-                "estatus": "Estatus 3"
-            },
-            {
-                "id": "Estatus 4",
-                "estatus": "Estatus 4"
-            },
-            {
-                "id": "Estatus 5",
-                "estatus":"Estatus 5"
-            }
-        ]
-    }
+    estados_siaf = api_estado_siaf(request)
+    fiscalizadores = api_fiscalizador(request)
+
     audit(
         correo=user.correo,
         accion="Alta_CFDIs",
@@ -83,7 +62,8 @@ def cfdi_alta_page(request: Request):
             "user_role": user.rol,
             "user_name": user.nombre,
             "user_email": user.correo,
-            "estados_siaf":estados_siaf
+            "estados_siaf":estados_siaf,
+            "fiscalizadores":fiscalizadores
         }
     )
 
