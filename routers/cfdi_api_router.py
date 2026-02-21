@@ -41,6 +41,7 @@ def api_list(request: Request, q: str = ""):
 @router.get("/{cfdi_id}/detalle")
 def api_detalle(request: Request, cfdi_id: int):
     _require_user(request)
+    #print(cfdi_id)
     row = get_factura_detalle(cfdi_id)
     if not row:
         raise HTTPException(status_code=404, detail="Not Found")
@@ -243,29 +244,128 @@ async def api_alta(
 async def api_update(
     request: Request,
     cfdi_id: int,
-    cfdi_estatus: str = Form("ACTIVO"),
+    estatus_os: int = Form(...), #estatus Administrativo
+    monto_partida: Optional[float] = Form(0),
+    ieps: Optional[float] = Form(0),
+    descuento: Optional[float] = Form(0),
+    otras_contribuciones: Optional[float] = Form(0),
+    retenciones: Optional[float] = Form(0),
+    penalizacion: Optional[float] = Form(0),
+    deductiva: Optional[float] = Form(0),
+    importe_pago: Optional[float] = Form(0),
+    observaciones_cfdi: Optional[str] = Form(None),
 
-    # OS editables
-    partida_id: int = Form(...),
-    estatus_os: int = Form(...),
-    fecha_pago: str = Form(""),
-    # Nuevos campos CFDI
-    fecha_emision: str = Form(""),
-    fecha_recepcion: str = Form(""),
-    tipo_de_contrato: str = Form(""),
-    observaciones_os: str = Form(""),
+    #Complementaria
+    orden_suministro: Optional[str] = Form(None),
+    fecha_solicitud: Optional[str] = Form(None),
+    folio_oficio: Optional[str] = Form(None),
+    folio_interno: Optional[str] = Form(None),
+    cuenta_bancaria: Optional[str] = Form(None),
+    banco: Optional[str] = Form(None),   
+    importe_p_compromiso: Optional[float] = Form(0),
+    no_compromiso: Optional[int] = Form(0),
+    fecha_pago: Optional[str] = Form(None),
+    validacion: Optional[str] = Form(None),
+    cincomillar: Optional[str] = Form(None),
+    risr: Optional[str] = Form(None),
+    riva: Optional[str] = Form(None),
+    solicitud: Optional[str] = Form(None),
+    observaciones_os: Optional[str] = Form(None),
+    archivo: Optional[str] = Form(None),
+    
+    #facturacion
+    fecha_fiscalizacion: Optional[str] = Form(None),
+    fiscalizador: Optional[str] = Form(None),
+    responsable_fis: Optional[str] = Form(None),
+    fecha_carga_sicop: Optional[str] = Form(None),
+    responsable_carga_sicop: Optional[str] = Form(None),
+    numero_solicitud: Optional[str] = Form(None),
+    clc: Optional[str] = Form(None),
+    estatus_siaf: Optional[str] = Form(None),
+
+    #devolucion
+    oficio_dev: Optional[str] = Form(None),
+    fecha_dev: Optional[str] = Form(None),
+    motivo_dev: Optional[str] = Form(None),
+
+    #ultimos
+    ret_imp_nom: Optional[float] = Form(0),
+    fecha_pr: Optional[str] = Form(None),
+    inmueble: Optional[str] = Form(None),
+    periodo: Optional[str] = Form(None),
+    recargos: Optional[str] = Form(None),
+    corte_presupuesto: Optional[str] = Form(None),
+    fecha_turno: Optional[str] = Form(None),
+    obs_pr: Optional[str] = Form(None),
+    numero_solicitud25: Optional[str] = Form(None),
+    clc25: Optional[str] = Form(None),
+    numero_solicitud26: Optional[str] = Form(None),
+    clc26: Optional[str] = Form(None),
+    numero_solicitud27: Optional[str] = Form(None),
+    clc27: Optional[str] = Form(None),
 ):
     user = _require_user(request)
     res = update_factura_and_os(
         cfdi_id=cfdi_id,
-        cfdi_estatus=cfdi_estatus,
-        partida_id=partida_id if partida_id else None,
-        estatus_os=estatus_os if estatus_os else None,
+        estatus_os=estatus_os, #estatus Administrativo
+        monto_partida=monto_partida,
+        ieps= ieps,
+        descuento=descuento,
+        otras_contribuciones=otras_contribuciones,
+        retenciones=retenciones,
+        penalizacion=penalizacion,
+        deductiva=deductiva,
+        importe_pago=importe_pago,
+        observaciones_cfdi=observaciones_cfdi,
+        #os
+        orden_suministro=orden_suministro,
+        fecha_solicitud=fecha_solicitud,
+        folio_oficio=folio_oficio,
+        folio_interno=folio_interno,
+        cuenta_bancaria=cuenta_bancaria,
+        banco=banco,   
+        importe_p_compromiso=importe_p_compromiso,
+        no_compromiso=no_compromiso,
         fecha_pago=fecha_pago,
-        fecha_emision=fecha_emision or None,
-        fecha_recepcion=fecha_recepcion or None,
-        tipo_de_contrato=tipo_de_contrato or None,
+        validacion=validacion,
+        cincomillar=cincomillar,
+        riva=riva,
+        risr=risr,
+        solicitud=solicitud,
         observaciones_os=observaciones_os,
+        archivo=archivo,
+
+        #facturacion
+        fecha_fiscalizacion=fecha_fiscalizacion,
+        fiscalizador=fiscalizador,
+        responsable_fis=responsable_fis,
+        fecha_carga_sicop=fecha_carga_sicop,
+        responsable_carga_sicop=responsable_carga_sicop,
+        numero_solicitud=numero_solicitud,
+        clc=clc,
+        estatus_siaf=estatus_siaf,
+
+        #devolucion
+        oficio_dev=oficio_dev,
+        fecha_dev=fecha_dev,
+        motivo_dev=motivo_dev,
+
+        #final
+        ret_imp_nom=ret_imp_nom,
+        fecha_pr=fecha_pr,
+        inmueble=inmueble,
+        periodo=periodo,
+        recargos=recargos,
+        corte_presupuesto=corte_presupuesto,
+        fecha_turno=fecha_turno,
+        obs_pr=obs_pr,
+        numero_solicitud25=numero_solicitud25,
+        clc25=clc25,
+        numero_solicitud26=numero_solicitud26,
+        clc26=clc26,
+        numero_solicitud27=numero_solicitud27,
+        clc27=clc27,
+
     )
     audit(user.correo, "EDICION_CFDI", f"Edición CFDI id={cfdi_id}", build_log(request))
     return res

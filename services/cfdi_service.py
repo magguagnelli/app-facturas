@@ -97,22 +97,24 @@ def get_factura_detalle(cfdi_id: int) -> Optional[Dict[str, Any]]:
               ct.*,
               os.estatus status_os,
               pr.rfc as proveedor_rfc,
-              pr.razon_social as proveedor_razon
+              pr.razon_social as proveedor_razon,
+              u.nombre capturista
             FROM cat_facturas.cfdi c
             LEFT JOIN cat_facturas.orden_suministro os ON os.id = c.orden_suministro
             LEFT JOIN cat_facturas.partida p ON p.id = os.partida
             LEFT JOIN cat_facturas.contrato ct ON ct.id = p.contrato
             LEFT JOIN cat_facturas.proveedor pr ON pr.id = os.proveedor
+            left join cat_facturas.usuario u on c.resp_captura = u.correo
             WHERE c.id=%s
             """, (cfdi_id,))
             row = cur.fetchone()
+            #print(row)
             if not row: 
                 return None
             # Nota: aquí devolvemos “crudo” por ser modal informativo
             if isinstance(row, dict):
                 return row
             cols = [d[0] for d in cur.description]
-            print(row)
             return dict(zip(cols, row))
   
 def list_contratos() -> List[Dict[str, Any]]:
@@ -381,15 +383,65 @@ def create_factura_and_os(
 def update_factura_and_os(
     *,
     cfdi_id: int,
-    cfdi_estatus: str,
-    # OS editables (NO editar NOT NULL que tú definiste: se ignoran)
-    partida_id: Optional[int],
-    estatus_os: Optional[int],
+    estatus_os: int, #estatus Administrativo
+    monto_partida: float,    
+    ieps: Optional[float] = 0,
+    descuento: Optional[float] = 0,
+    otras_contribuciones: Optional[float] = 0,
+    retenciones: Optional[float] = 0,
+    penalizacion: Optional[float] = 0,
+    deductiva: Optional[float] = 0,
+    importe_pago: Optional[float] = 0,
+    observaciones_cfdi: Optional[str] = None,
+
+    #Complementaria
+    orden_suministro: Optional[str] = None,
+    fecha_solicitud: Optional[str] = None,
+    folio_oficio: Optional[str] = None,
+    folio_interno: Optional[str] = None,
+    cuenta_bancaria: Optional[str] = None,
+    banco: Optional[str] = None,   
+    importe_p_compromiso: Optional[float] = 0,
+    no_compromiso: Optional[int] = 0,
     fecha_pago: Optional[str] = None,
-    fecha_emision: Optional[str] = None,
-    fecha_recepcion: Optional[str] = None,
-    tipo_de_contrato: Optional[str] = None,
+    validacion: Optional[str] = None,
+    cincomillar: Optional[str] = None,
+    risr: Optional[str] = None,
+    riva: Optional[str] = None,
+    solicitud: Optional[str] = None,
     observaciones_os: Optional[str] = None,
+    archivo: Optional[str] = None,
+    
+    #facturacion
+    fecha_fiscalizacion: Optional[str] = None,
+    fiscalizador: Optional[str] = None,
+    responsable_fis: Optional[str] = None,
+    fecha_carga_sicop: Optional[str] = None,
+    responsable_carga_sicop: Optional[str] = None,
+    numero_solicitud: Optional[str] = None,
+    clc: Optional[str] = None,
+    estatus_siaf: Optional[str] = None,
+
+    #devolucion
+    oficio_dev: Optional[str] = None,
+    fecha_dev: Optional[str] = None,
+    motivo_dev: Optional[str] = None,
+
+    #ultimos
+    ret_imp_nom: Optional[float] = 0,
+    fecha_pr: Optional[str] = None,
+    inmueble: Optional[str] = None,
+    periodo: Optional[str] = None,
+    recargos: Optional[str] = None,
+    corte_presupuesto: Optional[str] = None,
+    fecha_turno: Optional[str] = None,
+    obs_pr: Optional[str] = None,
+    numero_solicitud25: Optional[str] = None,
+    clc25: Optional[str] = None,
+    numero_solicitud26: Optional[str] = None,
+    clc26: Optional[str] = None,
+    numero_solicitud27: Optional[str] = None,
+    clc27: Optional[str] = None,
 ) -> Dict[str, Any]:
     with get_conn() as conn:
         with conn.cursor() as cur:
@@ -403,54 +455,134 @@ def update_factura_and_os(
             # actualiza CFDI (uuid/rfc/fechas/obs/estatus)
             cur.execute("""
                 UPDATE cat_facturas.cfdi
-                SET onservaciones=%s,
-                    estatus=%s
+                SET onservaciones=%s
                 WHERE id=%s
             """, (
-                (observaciones_os or None),cfdi_estatus, cfdi_id
+                (observaciones_os or None), cfdi_id
             ))
-
-            # actualiza OS solo campos permitidos + cambio de partida
-            if partida_id:
-                cur.execute("UPDATE cat_facturas.orden_suministro SET partida=%s WHERE id=%s", (partida_id, os_id))
-
-                # si viene tipo_de_contrato, actualizar también contrato
-                if tipo_de_contrato:
-                    cur.execute(
-                        "SELECT contrato FROM cat_facturas.partida WHERE id=%s",
-                        (partida_id,)
-                    )
-                    part_row = cur.fetchone()
-                    if part_row:
-                        contrato_id = part_row[0] if not isinstance(part_row, dict) else part_row.get("contrato")
-                        print("DEBUG: tipo_de_contrato =", tipo_de_contrato)
-                        print("DEBUG: contrato_id =", contrato_id)
-                        if contrato_id:
-                            cur.execute(
-                                "UPDATE cat_facturas.contrato SET tipo_de_contrato=%s WHERE id=%s",
-                                (tipo_de_contrato, contrato_id)
-                            )
-                            #print("DEBUG: actualización ejecutada")
- 
-            if estatus_os is not None:
-                cur.execute("UPDATE cat_facturas.orden_suministro SET estatus=%s WHERE id=%s", (estatus_os, os_id))
-
-            cur.execute("""
+            sql = """
                 UPDATE cat_facturas.orden_suministro
-                SET fecha_pago=%s,
-                    observaciones=%s,
-                    fecha_emision=%s,
-                    fecha_recepcion=%s
-                WHERE id=%s
-            """, (
-                (observaciones_os or None), cfdi_estatus, fecha_emision,
-                fecha_recepcion, cfdi_id
+                SET
+                    estatus = %s,
+                    monto_c_iva = %s,
+                    ieps = %s,
+                    descuento = %s,
+                    otras_contribuciones = %s,
+                    retenciones = %s,
+                    penalizacion = %s,
+                    deductiva = %s,
+                    importe_pago = %s,
+                    observaciones = %s,
+
+                    orden_suministro = %s,
+                    fecha_orden = %s,
+                    folio_oficio = %s,
+                    folio_interno = %s,
+                    cuenta_bancaria = %s,
+                    banco = %s,
+                    importe_p_compromiso = %s,
+                    no_compromiso = %s,
+                    fecha_pago = %s,
+                    validacion = %s,
+                    _5millar = %s,
+                    risr = %s,
+                    riva = %s,
+                    solicitud = %s,
+                    archivo = %s,
+
+                    fecha_fiscalizacion = %s,
+                    fiscalizador = %s,
+                    responsable_fis = %s,
+                    fecha_carga_sicop = %s,
+                    responsable_carga_sicop = %s,
+                    numero_solicitud_pago = %s,
+                    clc = %s,
+                    estatus_siaff = %s,
+
+                    oficio_dev = %s,
+                    fecha_dev = %s,
+                    motivo_dev = %s,
+
+                    re_imp_nomina = %s,
+                    fecha_pr = %s,
+                    inmueble = %s,
+                    periodo = %s,
+                    recargos = %s,
+                    corte_presupuesto = %s,
+                    fecha_turno = %s,
+                    observacion_pr = %s,
+
+                    numero_solicitud_pago25 = %s,
+                    clc25 = %s,
+                    numero_solicitud_pago26 = %s,
+                    clc26 = %s,
+                    numero_solicitud_pago27 = %s,
+                    clc27 = %s
+
+                WHERE id = %s
+                """
+            cur.execute(sql, (
+                estatus_os,
+                monto_partida,
+                ieps,
+                descuento,
+                otras_contribuciones,
+                retenciones,
+                penalizacion,
+                deductiva,
+                importe_pago,
+                observaciones_cfdi or observaciones_os,
+
+                orden_suministro,
+                fecha_solicitud,
+                folio_oficio,
+                folio_interno,
+                cuenta_bancaria,
+                banco,
+                importe_p_compromiso,
+                no_compromiso,
+                fecha_pago,
+                validacion,
+                cincomillar,
+                risr,
+                riva,
+                solicitud,
+                archivo,
+
+                fecha_fiscalizacion,
+                fiscalizador,
+                responsable_fis,
+                fecha_carga_sicop,
+                responsable_carga_sicop,
+                numero_solicitud,
+                clc,
+                estatus_siaf,
+
+                oficio_dev,
+                fecha_dev,
+                motivo_dev,
+
+                ret_imp_nom,
+                fecha_pr,
+                inmueble,
+                periodo,
+                recargos,
+                corte_presupuesto,
+                fecha_turno,
+                obs_pr,
+
+                numero_solicitud25,
+                clc25,
+                numero_solicitud26,
+                clc26,
+                numero_solicitud27,
+                clc27,                
+                os_id
             )
         )
-
         conn.commit()
-
-    return {"ok": True}
+    ret = {"ok":True,"message":"Registro actualizado correctamente"}
+    return ret
 
 
 

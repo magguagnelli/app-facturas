@@ -70,9 +70,9 @@ def cfdi_alta_page(request: Request):
 @router.api_route("/cfdi/edit", methods=["GET", "POST"], response_class=HTMLResponse)
 def cfdi_edit_page(
         request: Request, 
-        id_cfdi: Optional [int] = Form(1)
+        id_cfdi: int = Form(...)
     ):
-    id_cfdi = 1;
+    #print(f"Api_router, CFDI: {id_cfdi}")
     user = require_login(request)
     if id_cfdi ==0:
         return RedirectResponse(url="/cfd/nuevo", status_code=302)
@@ -85,31 +85,10 @@ def cfdi_edit_page(
 
     cfdi = api_detalle(request,id_cfdi)
     cfdi["estados_os"] = api_estado_orden(request)
-    cfdi["estados_siaf"] = {
-        "items": [
-            {
-                "id": "Estatus 1",
-                "estatus": "Estatus 1"
-            },
-            {
-                "id": "Estatus 2",
-                "estatus": "Estatus 2"
-            },
-            {
-                "id": "Estatus 3",
-                "estatus": "Estatus 3"
-            },
-            {
-                "id": "Estatus 4",
-                "estatus": "Estatus 4"
-            },
-            {
-                "id": "Estatus 5",
-                "estatus":"Estatus 5"
-            }
-        ]
-    }
+    cfdi["estados_siaf"] = api_estado_siaf(request)
+    cfdi["fiscalizadores"] = api_fiscalizador(request)
     #print(cfdi["item"])
+    
     audit(
         correo=user.correo,
         accion="EDICION_CFDI",

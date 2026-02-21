@@ -1,6 +1,7 @@
 // static/js/cfdi.js
 const AU = {
   isAlta: () => window.location.pathname.includes("/cfdi/nuevo"),
+  isEdit: () => window.location.pathname.includes("/cfdi/edit"),
 };
 
 async function au_fetch(url, opts = {}) {
@@ -340,7 +341,6 @@ async function au_loadEstadoAdmin(selectEl,val=1){
 }
 
 async function au_openEdit(cfdiId) {
-  //alert(cfdiId)
    // Crear formulario dinámico
   const form = document.createElement("form");
   form.method = "POST";
@@ -348,6 +348,7 @@ async function au_openEdit(cfdiId) {
   // Campo oculto id_cfdi
   const input = document.createElement("input");
   input.type = "hidden";
+  input.name = "id_cfdi";
   input.id = "id_cfdi";
   input.value = cfdiId;
   form.appendChild(input);
@@ -364,25 +365,88 @@ function au_closeEdit() {
 async function au_submitEdit(e) {
   e.preventDefault();
   const id = parseInt(au_qs("au_edit_cfdi_id").value, 10);
-  const form = new FormData();
-  form.append("cfdi_estatus", au_qs("au_edit_estatus").value);
-  form.append("estatus_os", au_qs("au_edit_os_estatus").value || "1");
-  form.append("fecha_pago", au_qs("au_edit_fecha_pago").value || "");
-  form.append("observaciones_os", au_qs("au_edit_obs_os").value.trim());
-  form.append("fecha_emision", au_formatToBackend(au_qs("au_edit_femi").value));
-  form.append("fecha_recepcion", au_formatToBackend(au_qs("au_edit_frec").value));
-  form.append("tipo_de_contrato", au_qs("au_tipo_contrato").value);
+  //formulario
+  const form = au_qs("au_editFormulario");
+  const fd = new FormData(form);
+  //Campos editables
+  
+  //Info contrato
+  //alert(au_qs("au_estatus_os").value)
+  fd.set("estatus_os",au_qs("au_estatus_os").value);
+  //info CFDI
+  fd.set("monto_partida", au_qs("au_monto_partida").value || 0);
+  fd.set("ieps", au_qs("au_ieps").value);
+  fd.set("descuento", au_qs("au_descuento").value);
+  fd.set("otras_contribuciones", au_qs("au_otras").value);
+  fd.set("retenciones", au_qs("au_retenciones").value);au_ret_imp_nom
+  fd.set("penalizacion", au_qs("au_penalizacion").value);
+  fd.set("deductiva", au_qs("au_deductiva").value);
+  fd.set("importe_pago", au_qs("au_importe_pago").value);
+  fd.set("observaciones_cfdi", au_qs("au_obs_cfdi").value.trim());
+  //OS
+  fd.set("orden_suministro", au_qs("au_orden_suministro").value);
+  fd.set("fecha_solicitud", au_qs("au_fecha_orden").value);
+  fd.set("folio_oficio", au_qs("au_folio_oficio").value.trim());
+  fd.set("folio_interno", au_qs("au_folio_interno").value.trim());
+  fd.set("cuenta_bancaria", au_qs("au_cuenta_bancaria").value.trim());
+  fd.set("banco", au_qs("au_banco").value.trim());
+  fd.set("importe_p_compromiso", au_qs("au_importe_comp").value);
+  fd.set("no_compromiso", au_qs("au_no_comp").value);
+  fd.set("archivo", au_qs("au_archivo").value.trim());
+  fd.set("fecha_pago", au_qs("au_fecha_pago").value || "");
+  fd.set("validacion", au_qs("au_validacion").value);
+  fd.set("cincomillar", au_qs("au_5millar").value);
+  fd.set("risr", au_qs("au_risr").value);
+  fd.set("riva", au_qs("au_riva").value);
+  fd.set("solicitud", au_qs("au_solicitud").value);
+  fd.set("observaciones_os", au_qs("au_obs_os").value.trim());
 
-  const pid = parseInt(au_qs("au_edit_partida").value, 10) || 0;
-  form.append("partida_id", pid.toString());
+   //Facturacion
+  fd.set("fecha_fiscalizacion", au_qs("au_fecha_fiscalizacion").value);  
+  fd.set("fiscalizador", au_qs("au_fiscalizador").value);  
+  fd.set("responsable_fis", au_qs("au_responsable_fis").value);  
+  fd.set("fecha_carga_sicop", au_qs("au_fecha_carga_sicop").value);
+  fd.set("responsable_carga_sicop", au_qs("au_responsable_carga_sicop").value);
+  fd.set("estatus_siaf", au_qs("au_estatus_siaf").value);
+  fd.set("numero_solicitud", au_qs("au_numero_solicitud_pago").value);  
+  fd.set("clc", au_qs("au_clc").value);
+
+  //Devolucion
+  fd.set("oficio_dev", au_qs("au_oficio_dev").value);  
+  fd.set("fecha_dev", au_qs("au_fecha_dev").value);  
+  fd.set("motivo_dev", au_qs("au_motivo_dev").value);  
+ 
+  //finals
+  fd.set("ret_imp_nom", au_qs("au_ret_imp_nom").value);
+  fd.set("fecha_pr", au_qs("au_fecha_pr").value);
+  fd.set("inmueble", au_qs("au_inmueble").value);
+  fd.set("periodo", au_qs("au_periodo").value);
+  fd.set("recargos", au_qs("au_recargos").value);
+  fd.set("corte_presupuesto", au_qs("au_corte_presupuesto").value);
+  fd.set("fecha_turno", au_qs("au_fecha_turno").value);
+  fd.set("obs_pr", au_qs("au_obs_pr").value);
+  fd.set("numero_solicitud25", au_qs("au_numero_solicitud_pago25").value);  
+  fd.set("clc25", au_qs("au_clc25").value);
+  fd.set("numero_solicitud26", au_qs("au_numero_solicitud_pago26").value);  
+  fd.set("clc26", au_qs("au_clc26").value);
+  fd.set("numero_solicitud27", au_qs("au_numero_solicitud_pago27").value);  
+  fd.set("clc27", au_qs("au_clc27").value);  
+  //debug
+  /*datos = 0;
+  for (let [clave, valor] of fd.entries()) {
+    datos += 1;
+    console.log(datos+": "+`${clave}: ${valor}`);
+  }*/
+
   if (!confirm("¿Dese acontinuar con la actualización?")) return;
   try {
-    const res = await au_fetch(`/api/cfdi/${id}`, { method: "PUT", body: form });
-    au_qs("au_editMsg").textContent = "Guardado.";
-    au_closeEdit();
-    await au_loadList();
+    const res = await au_fetch(`/api/cfdi/${id}`, { method: "PUT", body: fd });
+    if(res.ok){
+      alert(res?.message)
+      window.location.href = "/cfdi";
+    }
   } catch (err) {
-    au_qs("au_editMsg").textContent = (err?.detail || err?.message || JSON.stringify(err));
+    au_qs("au_editMsg").textContent = (JSON.stringify(err?.detail) || JSON.stringify(err?.message) || JSON.stringify(err));
   }
 }
 
@@ -632,14 +696,17 @@ window.addEventListener("DOMContentLoaded", async () => {
     await au_initAltaCatalogos();
     //await au_initEstadoOrden();
     return;
+  }else if(AU.isEdit()){
+    au_qs("au_editForm")?.addEventListener("click", au_submitEdit);
+  }else{
+    // listado
+    au_qs("au_btnBuscar")?.addEventListener("click", au_loadList);
+    au_qs("au_btnCloseModal")?.addEventListener("click", au_closeDetalle);
+    //au_qs("au_btnCloseEdit")?.addEventListener("click", au_closeEdit);
+    //au_qs("au_btnDelete")?.addEventListener("click", au_deleteCfdi);
+
+    await au_loadList();
   }
 
-  // listado
-  au_qs("au_btnBuscar")?.addEventListener("click", au_loadList);
-  au_qs("au_btnCloseModal")?.addEventListener("click", au_closeDetalle);
-  au_qs("au_btnCloseEdit")?.addEventListener("click", au_closeEdit);
-  au_qs("au_editForm")?.addEventListener("submit", au_submitEdit);
-  au_qs("au_btnDelete")?.addEventListener("click", au_deleteCfdi);
-
-  await au_loadList();
+  
 });
