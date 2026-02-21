@@ -23,6 +23,7 @@ from services.cfdi_service import (
     set_cfdi_estatus,
     list_est_siaf,
     list_fiscalizador,
+    get_factura_audit,
 )
 
 router = APIRouter(prefix="/api/cfdi", tags=["cfdi_api"])
@@ -37,6 +38,15 @@ def _require_user(request: Request):
 def api_list(request: Request, q: str = ""):
     _require_user(request)
     return {"items": list_facturas(q)}
+
+@router.get("/{cfdi_id}/audit")
+def api_audit(request: Request, cfdi_id: str):
+    _require_user(request)
+    #print(cfdi_id)
+    rows = get_factura_audit(cfdi_id)
+    if not rows:
+        raise HTTPException(status_code=404, detail="Not Found")
+    return {"item": rows}
 
 @router.get("/{cfdi_id}/detalle")
 def api_detalle(request: Request, cfdi_id: int):
@@ -367,7 +377,7 @@ async def api_update(
         clc27=clc27,
 
     )
-    audit(user.correo, "EDICION_CFDI", f"Edición CFDI id={cfdi_id}", build_log(request))
+    audit(user.correo, "EDICION_CFDI", f"Edición de información de CFDI id={cfdi_id}", build_log(request),"cat_facturas.cfdi",str(cfdi_id))
     return res
 
 
@@ -376,7 +386,7 @@ async def api_update(
 def api_set_status(request: Request, cfdi_id: int, estatus: str = Form(...)):
     user = _require_user(request)
     res = set_cfdi_estatus(cfdi_id, estatus)
-    audit(user.correo, "CFDI_ESTATUS", f"Cambio estatus CFDI id={cfdi_id} -> {estatus}", build_log(request))
+    audit(user.correo, "CFDI_ESTATUS", f"Cambio estatus CFDI id={cfdi_id} -> {estatus}", build_log(request),"cat_facturas.cfdi",cfdi_id)
     return res
 
 @router.get("/catalogos/proveedor-by-rfc")

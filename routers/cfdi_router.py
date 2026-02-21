@@ -51,7 +51,7 @@ def cfdi_alta_page(request: Request):
 
     audit(
         correo=user.correo,
-        accion="Alta_CFDIs",
+        accion="Acceso_Alta_CFDIs",
         descripcion="Acceso a nuevo CFDI",
         log_accion=build_log(request),
     )
@@ -91,7 +91,7 @@ def cfdi_edit_page(
     
     audit(
         correo=user.correo,
-        accion="EDICION_CFDI",
+        accion="ACCESO_EDICION_CFDI",
         descripcion=f"Acceso a edición CFDI id={id_cfdi}",
         log_accion=build_log(request)
     )

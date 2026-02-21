@@ -215,9 +215,6 @@ function fl_renderTabla(items) {
             <td>
                 <span class="fl_badge ${badgeClass}">${fl_escape(item.estatus_general || "N/A")}</span>
             </td>
-            <td class="fl_actions">
-                <button class="fl_btn fl_btn_sm fl_btn_primary" onclick="fl_verDetalle(${item.cfdi_id})">Ver</button>
-            </td>
         `;
         tbody.appendChild(tr);
     });

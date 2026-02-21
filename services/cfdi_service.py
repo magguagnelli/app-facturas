@@ -86,6 +86,43 @@ def list_facturas(q: str = "") -> List[Dict[str, Any]]:
                     out.append(dict(zip(cols, row)))
             return out
 
+def get_factura_audit(cfdi_id: str) -> List[Dict[str, Any]]:
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT 
+                    a.id,
+                    CASE
+                        WHEN a.accion LIKE 'ALTA%%' THEN 'ALTA'
+                        WHEN a.accion LIKE 'EDICION%%' THEN 'MODIFICACIÓN'
+                        ELSE 'SIN CLASIFICAR'
+                    END AS "ACCION",
+                    UPPER(a.descripcion) AS "DESCRIPCION",
+                    TO_CHAR(a.fecha_accion,'DD-MM-YYYY HH24:MI:SS') AS "FECHA DE ACCION",
+                    UPPER(u.nombre) AS "RESPONSABLE",
+                    UPPER(a.correo) AS "CORREO",
+                    r.*
+                FROM cat_facturas.auditoria a
+                LEFT JOIN LATERAL jsonb_to_record(
+                    cat_facturas.get_registro(a.seccion,a.id_sec)
+                ) AS r(uuid text) ON true
+                LEFT JOIN cat_facturas.usuario u 
+                    ON u.correo = a.correo
+                WHERE 
+                    (a.accion LIKE 'ALTA%%' OR a.accion LIKE 'EDIC%%')
+                    AND a.seccion = 'cat_facturas.cfdi' 
+                    AND a.id_sec = %s
+                ORDER BY a.id ASC;
+            """, (cfdi_id,))
+            rows = cur.fetchall()
+
+            if not rows:
+                return []
+
+            cols = [d[0] for d in cur.description]
+
+            return [dict(row) for row in rows]
+
 def get_factura_detalle(cfdi_id: int) -> Optional[Dict[str, Any]]:
     with get_conn() as conn:
         with conn.cursor() as cur:

@@ -63,8 +63,13 @@ async function au_loadList() {
       <td><span class="au_badge au_badge_neu">${au_escape(it.estatus_reporte || "EN CAPTURA")}</span></td>
       <td><span class="au_badge au_badge_neu">${au_escape(it.cfdi_estatus || "ACTIVO")}</span></td>
       <td>
-        <button class="au_btn au_btn_sm" data-act="detalle" data-id="${it.cfdi_id}">Ver detalle</button>
-        <button class="au_btn au_btn_sm au_btn_secondary" data-act="editar" data-id="${it.cfdi_id}">Editar</button>
+        <button class="au_btn au_btn_sm" data-act="editar" data-id="${it.cfdi_id}">Editar</button>
+      </td>
+      <td>
+        <button class="au_btn au_btn_sm" data-act="detalle" data-id="${it.cfdi_id}">Detalle</button>
+      </td>
+      <td>
+        <button class="au_btn au_btn_sm" data-act="audit" data-id="${it.cfdi_id}">Auditoria</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -76,6 +81,7 @@ async function au_loadList() {
       const act = btn.dataset.act;
       if (act === "detalle") return au_openDetalle(id);
       if (act === "editar") return au_openEdit(id);
+      if (act === "audit") return au_openAudit(id);
     });
   });
 }
@@ -148,6 +154,62 @@ function au_toggleXML() {
     xmlContent.style.display = 'none';
     btn.textContent = 'Mostrar XML';
   }
+}
+
+async function au_openAudit(cfdiID){
+  
+  const bg = au_qs("au_auditBg");
+  const body = au_qs("au_modalaBody");
+  const title = au_qs("au_modalaTitle");
+  const subtitle = au_qs("au_modalaSubtitle");
+  au_show(bg, true);
+  body.innerHTML = '<div class="au_detail_loading">Cargando información...</div>';
+  try{
+    const data = await au_fetch(`/api/cfdi/${cfdiID}/audit`);
+    const item = data.item || {};
+    // Actualizar título y subtítulo
+    title.textContent = `Detalle CFDI #${item[0].uuid || cfdiID}`;
+    subtitle.textContent = `UUID: ${item[0].uuid || 'N/A'}`;
+    console.log("Audit data: ", JSON.stringify(item));
+    let table = `
+        <div class="table-responsive">
+        <table class="table table-bordered table-hover table-sm align-middle">
+            <thead class="table-dark">
+                <tr>`;
+
+      // Headers dinámicos
+      Object.keys(item[0]).forEach(key => {
+          table += `<th>${key}</th>`;
+      });
+
+    table += `</tr></thead><tbody>`;
+
+    // Rows
+    item.forEach(row => {
+        table += `<tr>`;
+        Object.values(row).forEach(value => {
+            table += `<td>${value ?? ''}</td>`;
+        });
+        table += `</tr>`;
+    });
+
+    table += `</tbody></table></div>`;
+
+    body.innerHTML = table;
+  }
+  catch(err){
+    body.innerHTML = `
+      <div class="au_detail_error">
+        <strong>Error al cargar la Auditoria:</strong>
+        <p>${err?.detail || err?.message || JSON.stringify(err)}</p>
+      </div>
+    `;
+  }
+
+}
+
+function au_closeAudit() {
+  au_show(au_qs("au_auditBg"), false);
 }
 
 async function au_openDetalle(cfdiId) {
@@ -356,10 +418,6 @@ async function au_openEdit(cfdiId) {
   document.body.appendChild(form);
   // Enviar formulario
   form.submit();
-}
-
-function au_closeEdit() {
-  au_show(au_qs("au_editBg"), false);
 }
 
 async function au_submitEdit(e) {
@@ -674,7 +732,7 @@ async function au_submitAlta(e) {
   msg.textContent = "Registrando...";
  
   try {
-    //console.log("form Save CFDI:", fd);
+    
     const res = await au_fetch("/api/cfdi/alta", { method: "POST", body: fd });
     msg.textContent = res?.message;
     if(res.ok){
@@ -702,7 +760,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     // listado
     au_qs("au_btnBuscar")?.addEventListener("click", au_loadList);
     au_qs("au_btnCloseModal")?.addEventListener("click", au_closeDetalle);
-    //au_qs("au_btnCloseEdit")?.addEventListener("click", au_closeEdit);
+    au_qs("au_btnCloseAudit")?.addEventListener("click", au_closeAudit);
     //au_qs("au_btnDelete")?.addEventListener("click", au_deleteCfdi);
 
     await au_loadList();
