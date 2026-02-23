@@ -12,7 +12,7 @@ from routers.auditoria_router import router as auditoria_router
 from routers.auditoria_api_router import router as auditoria_api_router
 
 from routers.proveedor_router import router as proveedor_router
-from routers.proveedor_api_router import router as proveedor_api_router
+#from routers.proveedor_api_router import router as proveedor_api_router
 
 from routers.export_router import router as export_router
 
@@ -47,7 +47,7 @@ app.include_router(auditoria_router)
 app.include_router(auditoria_api_router)
 
 app.include_router(proveedor_router)
-app.include_router(proveedor_api_router)
+#app.include_router(proveedor_api_router)
 
 app.include_router(export_router)
 

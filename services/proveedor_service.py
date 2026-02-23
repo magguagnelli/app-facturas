@@ -48,7 +48,8 @@ def list_proveedores(q: str | None = None) -> list[dict]:
     with get_conn() as conn:
         with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, params)
-            return cur.fetchall()
+            print(cur.fetchall())
+            return "hello"#cur.fetchall()
 
 def get_proveedor(prov_id: int) -> dict | None:
     sql = """

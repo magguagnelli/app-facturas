@@ -32,7 +32,7 @@ def list_proveedores_activos(search: str | None = None) -> list[dict]:
     if search:
         like = f"%{search.strip().lower()}%"
         sql = """
-          SELECT id, rfc, razon_social, nombre_comercial, estatus
+          SELECT id, rfc, razon_social, nombre_comercial, estatus, tipo_persona
           FROM cat_facturas.proveedor
           WHERE estatus = 'ACTIVO'
             AND (lower(rfc) LIKE %s OR lower(razon_social) LIKE %s OR lower(nombre_comercial) LIKE %s)
@@ -42,7 +42,7 @@ def list_proveedores_activos(search: str | None = None) -> list[dict]:
         params = (like, like, like)
     else:
         sql = """
-          SELECT id, rfc, razon_social, nombre_comercial, estatus
+          SELECT id, rfc, razon_social, nombre_comercial, estatus, tipo_persona
           FROM cat_facturas.proveedor
           WHERE estatus = 'ACTIVO'
           ORDER BY razon_social

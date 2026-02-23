@@ -50,14 +50,15 @@ function rfcUpper() {
 }
 
 async function load() {
-  const params = new URLSearchParams();
-  if (q.value.trim()) params.set("q", q.value.trim());
-  const { data } = await api(`/api/proveedores?${params.toString()}`);
+  //const params = new URLSearchParams();
+  //if (q.value.trim()) params.set("q", q.value.trim());
+  const { data } = await api(`/api/proveedores`);
 
   tbl.innerHTML = "";
   empty.style.display = data.length ? "none" : "block";
-
+  //console.log(JSON.stringify(data))
   data.forEach(p => {
+    console.log(JSON.stringify(p.tipo_persona))
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><b>${p.rfc}</b></td>

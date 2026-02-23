@@ -1,6 +1,7 @@
 # routers/proveedor_api_router.py
 from fastapi import APIRouter, Request, Query
 from fastapi.responses import JSONResponse
+
 import psycopg
 
 from core.auth import require_admin
@@ -16,7 +17,9 @@ def api_list_prov(request: Request, q: str | None = Query(default=None)):
     if not admin:
         return JSONResponse({"detail":"Unauthorized"}, status_code=401)
 
+    
     rows = list_proveedores(q)
+    print(rows)
     return {"data": rows}
 
 @router.get("/proveedores/{prov_id}")
@@ -29,6 +32,7 @@ def api_get_prov(request: Request, prov_id: int):
     if not row:
         return JSONResponse({"detail":"Not found"}, status_code=404)
 
+    print("get Proveedores/id")
     return {"data": row}
 
 @router.post("/proveedores")
@@ -46,6 +50,7 @@ async def api_create_prov(request: Request):
     except ValueError as e:
         return JSONResponse({"detail": str(e)}, status_code=400)
 
+    print("put Proveedores")
     audit(admin.correo, "CREATE_PROV", "Alta de proveedor", build_log(request, extra=f"id={new_id} rfc={payload.get('rfc','')}"))
     return {"id": new_id}
 
@@ -64,5 +69,6 @@ async def api_update_prov(request: Request, prov_id: int):
     except ValueError as e:
         return JSONResponse({"detail": str(e)}, status_code=400)
 
+    print("put Proveedores/id")
     audit(admin.correo, "UPDATE_PROV", "Edición de proveedor", build_log(request, extra=f"id={prov_id} rfc={payload.get('rfc','')}"))
     return {"ok": True}
